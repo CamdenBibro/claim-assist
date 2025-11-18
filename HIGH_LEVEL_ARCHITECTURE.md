@@ -387,7 +387,10 @@ Only using ebay and facebook marketplace
 
 # Areas for improvement
 
-1. Only use sources for used items. Use facebook market place and ebay
+1.  I still don't trust LLMs to adjust difficult examples like the unbranded vintage leather chair. This item should always be flagged for human intervention.
 2.  Consider using relied on depreciation data mapper. For items like the expensive couch, use API call to confirm retail value, then apply depreciation factor
+3.  Consider using a vision model for image recognition for difficult items (unbranded furniture, etc.)
+4.  Add human-in-the-loop feedback to the reasoning process. Have the LLM ask for additional information on certain items to help better evaluate. 
+
 
 
