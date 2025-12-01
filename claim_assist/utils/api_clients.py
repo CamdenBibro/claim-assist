@@ -25,11 +25,23 @@ def create_inference_client(config: Config) -> LocalInferenceClient:
         return _create_anthropic_wrapper(config)
     
     # Create local inference client
+    kwargs = {
+        "base_url": config.inference_base_url,
+        "api_key": config.inference_api_key
+    }
+    
+    # Add llamacpp_python specific parameters
+    if config.inference_backend == "llamacpp_python":
+        kwargs.update({
+            "model_path": config.model_path,
+            "n_gpu_layers": config.n_gpu_layers,
+            "n_ctx": config.n_ctx
+        })
+    
     return InferenceClientFactory.create_client(
         backend_type=config.inference_backend,
         model_name=config.model_name,
-        base_url=config.inference_base_url,
-        api_key=config.inference_api_key
+        **kwargs
     )
 
 

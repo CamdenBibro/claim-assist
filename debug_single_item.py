@@ -5,11 +5,11 @@ Run: python3 debug_single_item.py
 """ 
 
 import os
-from claim_assist.config import Config
-from claim_assist.models.item import ClaimItem
-from claim_assist.processors import ClaimProcessor
-from claim_assist.utils import create_anthropic_client
-from claim_assist.pricing import ItemClassifier, PriceResearcher, PriceValidator
+from src.config import Config
+from src.models.item import ClaimItem
+from src.processors import ClaimProcessor
+from src.utils import create_anthropic_client
+from src.pricing import ItemClassifier, PriceResearcher, PriceValidator
 
 
 def debug_single_item():

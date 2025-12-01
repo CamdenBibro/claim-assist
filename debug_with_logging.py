@@ -5,9 +5,9 @@ Debug script with detailed API response logging
 
 import os
 import json
-from claim_assist.config import Config
-from claim_assist.models.item import ClaimItem
-from claim_assist.utils import create_anthropic_client
+from src.config import Config
+from src.models.item import ClaimItem
+from src.utils import create_anthropic_client
 
 
 def debug_api_response():

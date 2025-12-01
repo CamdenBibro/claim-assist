@@ -56,12 +56,21 @@ def main():
     )
     parser.add_argument(
         "--inference-backend",
-        choices=["llamacpp", "openai_compatible", "transformers", "anthropic"],
+        choices=["llamacpp", "llamacpp_python", "openai_compatible", "transformers", "anthropic"],
         help="Local inference backend to use (default: llamacpp)"
     )
     parser.add_argument(
         "--model-name",
         help="Name of the model to use (e.g., llama-3.1-8b-instruct, gpt-3.5-turbo)"
+    )
+    parser.add_argument(
+        "--model-path",
+        help="Path to GGUF model file (for llamacpp_python backend)"
+    )
+    parser.add_argument(
+        "--n-gpu-layers",
+        type=int,
+        help="Number of layers to offload to GPU (for llamacpp_python, -1 for all)"
     )
     parser.add_argument(
         "--inference-url",
@@ -93,6 +102,10 @@ def main():
             config.inference_backend = args.inference_backend
         if args.model_name:
             config.model_name = args.model_name
+        if args.model_path:
+            config.model_path = args.model_path
+        if args.n_gpu_layers:
+            config.n_gpu_layers = args.n_gpu_layers
         if args.inference_url:
             config.inference_base_url = args.inference_url
         if args.api_key:
@@ -112,14 +125,18 @@ def main():
     except ValueError as e:
         print(f"Configuration error: {e}", file=sys.stderr)
         print("\nFor local inference, make sure your model server is running.")
-        print("For llama.cpp: Start server on port 8080 - see LLAMACPP_AMD_SETUP.md")
+        print("For llama.cpp server: Start server on port 8080 - see LLAMACPP_AMD_SETUP.md")
+        print("For llama-cpp-python: Set MODEL_PATH environment variable - see COLAB_QUICKSTART.md")
         print("For Anthropic (legacy): set ANTHROPIC_API_KEY environment variable")
         sys.exit(1)
 
     # Initialize processor
     print(f"Initializing Claim Assist processor with {config.inference_backend} backend...")
     print(f"Using model: {config.model_name}")
-    if config.inference_backend != "anthropic":
+    if config.inference_backend == "llamacpp_python":
+        print(f"Model path: {config.model_path}")
+        print(f"GPU layers: {config.n_gpu_layers}")
+    elif config.inference_backend != "anthropic":
         print(f"Inference URL: {config.inference_base_url}")
     
     processor = ClaimProcessor(config)

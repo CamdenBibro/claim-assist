@@ -7,12 +7,12 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from claim_assist.config import Config
-from claim_assist.utils.api_clients import create_inference_client
-from claim_assist.utils.web_scraping import WebScrapingService
-from claim_assist.models.item import ClaimItem
-from claim_assist.pricing.classifier import ItemClassifier
-from claim_assist.pricing.researcher import PriceResearcher
+from src.config import Config
+from src.utils.api_clients import create_inference_client
+from src.utils.web_scraping import WebScrapingService
+from src.models.item import ClaimItem
+from src.pricing.classifier import ItemClassifier
+from src.pricing.researcher import PriceResearcher
 
 
 def test_local_inference():

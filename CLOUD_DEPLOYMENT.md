@@ -4,6 +4,59 @@ This guide covers options for running Claim Assist in the cloud with GPU acceler
 
 ## Deployment Options
 
+### ⚡ EASIEST METHOD: llama-cpp-python (No Server Needed!)
+
+**Best for:** Simplest setup, works in Google Colab, Jupyter, or any Python environment
+
+Instead of building the C++ llama.cpp server, you can use the Python library directly!
+
+#### Quick Setup (Google Colab / Jupyter):
+
+```python
+# Cell 1: Install llama-cpp-python with CUDA support
+!pip install llama-cpp-python \
+  --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+
+# Cell 2: Download model
+!pip install huggingface-hub
+from huggingface_hub import hf_hub_download
+
+model_path = hf_hub_download(
+    repo_id="bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+    filename="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+)
+
+# Cell 3: Clone and setup claim-assist
+!git clone https://github.com/CamdenBibro/claim-assist.git
+%cd claim-assist
+!pip install -r requirements-minimal.txt
+
+# Cell 4: Upload your claims CSV
+from google.colab import files
+uploaded = files.upload()
+claims_file = list(uploaded.keys())[0]
+
+# Cell 5: Process claims (no server needed!)
+import os
+os.environ['INFERENCE_BACKEND'] = 'llamacpp_python'
+os.environ['MODEL_PATH'] = model_path
+os.environ['N_GPU_LAYERS'] = '50'  # Offload 50 layers to GPU
+
+!python -m claim_assist.main {claims_file}
+
+# Cell 6: Download results
+files.download('claim_evaluation_results.csv')
+```
+
+**Why this is better:**
+- ✅ No need to build C++ code
+- ✅ No separate server process
+- ✅ Works directly in Python
+- ✅ Auto-detects GPU (CUDA or ROCm)
+- ✅ Much simpler for cloud notebooks
+
+---
+
 ### Option 1: RunPod (Recommended - Easy GPU Access)
 
 **Best for:** GPU inference with minimal setup, pay-per-use
@@ -132,6 +185,8 @@ RunPod provides instant access to GPU servers with per-minute billing.
 
 Google Colab provides free GPU access with usage limits.
 
+**Use the EASIEST METHOD above for Colab! Here's the alternative C++ server approach:**
+
 #### Setup Steps:
 
 1. **Create a Colab Notebook**
@@ -139,7 +194,9 @@ Google Colab provides free GPU access with usage limits.
    - Click "New Notebook"
    - Go to Runtime → Change runtime type → GPU → T4 GPU
 
-2. **Install Dependencies**
+2. **Option A: llama-cpp-python (RECOMMENDED - See "EASIEST METHOD" section above)**
+
+3. **Option B: Build C++ Server (Advanced)**
    ```python
    # Cell 1: Install system dependencies
    !apt-get update

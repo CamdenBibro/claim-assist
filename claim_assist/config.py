@@ -8,10 +8,15 @@ class Config:
     """Configuration for Claim Assist application"""
 
     # Local Inference Configuration
-    inference_backend: str = "llamacpp"  # llamacpp, openai_compatible, transformers
+    inference_backend: str = "llamacpp"  # llamacpp, llamacpp_python, openai_compatible, transformers
     model_name: str = "llama-3.1-8b-instruct"
     inference_base_url: str = "http://localhost:8080/v1"
     inference_api_key: Optional[str] = None  # For OpenAI-compatible APIs
+    
+    # llama-cpp-python specific settings
+    model_path: Optional[str] = None  # Path to GGUF model file (for llamacpp_python backend)
+    n_gpu_layers: int = 50  # Number of layers to offload to GPU (-1 for all)
+    n_ctx: int = 4096  # Context window size
     
     # Legacy API Keys (deprecated, for backward compatibility)
     anthropic_api_key: Optional[str] = None
@@ -63,6 +68,11 @@ class Config:
             inference_base_url=parse_env_value("INFERENCE_BASE_URL", "http://localhost:8080/v1"),
             inference_api_key=parse_env_value("INFERENCE_API_KEY", ""),
             
+            # llama-cpp-python settings
+            model_path=parse_env_value("MODEL_PATH", ""),
+            n_gpu_layers=int(parse_env_value("N_GPU_LAYERS", "50")),
+            n_ctx=int(parse_env_value("N_CTX", "4096")),
+            
             # Legacy settings (for backward compatibility)
             anthropic_api_key=parse_env_value("ANTHROPIC_API_KEY", ""),
             perplexity_api_key=parse_env_value("PERPLEXITY_API_KEY", ""),
@@ -88,9 +98,13 @@ class Config:
             raise ValueError("INFERENCE_API_KEY is required when using openai_compatible backend")
         
         # Validate backend type
-        valid_backends = ["llamacpp", "openai_compatible", "transformers", "anthropic"]
+        valid_backends = ["llamacpp", "llamacpp_python", "openai_compatible", "transformers", "anthropic"]
         if self.inference_backend not in valid_backends:
             raise ValueError(f"Invalid inference backend: {self.inference_backend}. Must be one of: {valid_backends}")
+        
+        # Validate llamacpp_python specific settings
+        if self.inference_backend == "llamacpp_python" and not self.model_path:
+            raise ValueError("MODEL_PATH is required when using llamacpp_python backend")
 
 
 # Default configuration

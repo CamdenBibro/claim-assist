@@ -218,6 +218,77 @@ class LlamaCppClient(LocalInferenceClient):
             return False
 
 
+class LlamaCppPythonClient(LocalInferenceClient):
+    """Client for llama-cpp-python library (Python bindings, no server needed)"""
+    
+    def __init__(self, model_path: str, n_gpu_layers: int = 50, n_ctx: int = 4096):
+        """
+        Initialize llama-cpp-python client
+        
+        Args:
+            model_path: Path to the GGUF model file
+            n_gpu_layers: Number of layers to offload to GPU (-1 for all)
+            n_ctx: Context window size
+        """
+        self.model_path = model_path
+        self.n_gpu_layers = n_gpu_layers
+        self.n_ctx = n_ctx
+        self._llm = None
+        self._load_model()
+    
+    def _load_model(self):
+        """Load the model using llama-cpp-python"""
+        try:
+            from llama_cpp import Llama
+            self._llm = Llama(
+                model_path=self.model_path,
+                n_gpu_layers=self.n_gpu_layers,
+                n_ctx=self.n_ctx,
+                verbose=False
+            )
+        except Exception as e:
+            print(f"Failed to load model from {self.model_path}: {e}")
+    
+    def generate(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.1) -> InferenceResponse:
+        """Generate response using llama-cpp-python"""
+        if not self._llm:
+            return InferenceResponse(
+                content="",
+                model=self.model_path,
+                success=False,
+                error="Model not loaded"
+            )
+        
+        try:
+            result = self._llm.create_chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            
+            content = result["choices"][0]["message"]["content"]
+            tokens_used = result.get("usage", {}).get("total_tokens")
+            
+            return InferenceResponse(
+                content=content,
+                model=self.model_path,
+                tokens_used=tokens_used,
+                success=True
+            )
+            
+        except Exception as e:
+            return InferenceResponse(
+                content="",
+                model=self.model_path,
+                success=False,
+                error=str(e)
+            )
+    
+    def is_available(self) -> bool:
+        """Check if the model is loaded"""
+        return self._llm is not None
+
+
 class TransformersClient(LocalInferenceClient):
     """Client for Hugging Face Transformers local inference"""
     
@@ -299,7 +370,7 @@ class InferenceClientFactory:
         Create a local inference client
         
         Args:
-            backend_type: Type of backend ('llamacpp', 'openai_compatible', 'transformers')
+            backend_type: Type of backend ('llamacpp', 'llamacpp_python', 'openai_compatible', 'transformers')
             model_name: Name of the model to use
             **kwargs: Additional arguments for the specific client
         
@@ -311,6 +382,12 @@ class InferenceClientFactory:
                 model_name=model_name,
                 base_url=kwargs.get("base_url", "http://localhost:8080/v1"),
                 api_key=kwargs.get("api_key", "dummy")
+            )
+        elif backend_type == "llamacpp_python":
+            return LlamaCppPythonClient(
+                model_path=kwargs.get("model_path", model_name),
+                n_gpu_layers=kwargs.get("n_gpu_layers", 50),
+                n_ctx=kwargs.get("n_ctx", 4096)
             )
         elif backend_type == "openai_compatible":
             return OpenAICompatibleClient(
@@ -327,7 +404,7 @@ class InferenceClientFactory:
     def auto_detect_available() -> Optional[LocalInferenceClient]:
         """Auto-detect and return the first available local inference client"""
         
-        # Try llama.cpp first (best for AMD GPUs)
+        # Try llama.cpp server first (best for AMD GPUs)
         llamacpp_client = LlamaCppClient()
         if llamacpp_client.is_available():
             return llamacpp_client

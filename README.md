@@ -17,7 +17,41 @@ LLM-powered insurance claim adjuster that automates item valuation using web sea
 
 ## Quick Start
 
-### Option 1: Local Inference with llama.cpp (Recommended - Optimized for All GPUs!)
+### Option 1: Google Colab (EASIEST - No Setup!)
+
+Process claims in the cloud with free GPU access:
+
+1. Open [Google Colab](https://colab.research.google.com/)
+2. Enable GPU (Runtime → Change runtime type → T4 GPU)
+3. Follow the [COLAB_QUICKSTART.md](COLAB_QUICKSTART.md) guide
+
+**Literally copy-paste and run!** No installation needed.
+
+---
+
+### Option 2: Local Inference with llama-cpp-python (Simple Python Library)
+
+```powershell
+# Install with CUDA support (NVIDIA GPUs)
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+
+# Download model
+pip install huggingface-hub
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download('bartowski/Meta-Llama-3.1-8B-Instruct-GGUF', 'Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')"
+
+# Install claim-assist
+pip install -r requirements-minimal.txt
+
+# Configure and run
+$env:INFERENCE_BACKEND="llamacpp_python"
+$env:MODEL_PATH="path/to/downloaded/model.gguf"
+$env:N_GPU_LAYERS="50"
+python -m claim_assist.main example_claims.csv
+```
+
+---
+
+### Option 3: Local Inference with llama.cpp Server (Advanced - More Control)
 
 ```powershell
 # See LLAMACPP_AMD_SETUP.md for detailed GPU setup (NVIDIA or AMD)
@@ -40,7 +74,9 @@ $env:INFERENCE_BACKEND="llamacpp"
 python -m claim_assist.main example_claims.csv
 ```
 
-### Option 2: Cloud API (Legacy)
+---
+
+### Option 4: Cloud API (Legacy)
 
 ```bash
 # Install full dependencies
@@ -54,8 +90,10 @@ python -m claim_assist.main example_claims.csv --inference-backend anthropic
 ```
 
 **Setup Guides:**
-- ☁️ [CLOUD_DEPLOYMENT.md](CLOUD_DEPLOYMENT.md) - **Run this online with cloud GPUs!**
-- 🚀 [LLAMACPP_AMD_SETUP.md](LLAMACPP_AMD_SETUP.md) - **GPU users (NVIDIA/AMD) start here!**
+- 🎯 [COLAB_QUICKSTART.md](COLAB_QUICKSTART.md) - **Start here! Free cloud GPUs, zero setup!**
+- ☁️ [CLOUD_DEPLOYMENT.md](CLOUD_DEPLOYMENT.md) - **More cloud options (RunPod, AWS, etc.)**
+- 🐍 [How to use llama-cpp-python](#option-2-local-inference-with-llama-cpp-python-simple-python-library) - **Simple Python library, no server needed**
+- 🚀 [LLAMACPP_AMD_SETUP.md](LLAMACPP_AMD_SETUP.md) - **GPU users (NVIDIA/AMD) with C++ server**
 - 📖 [LOCAL_SETUP.md](LOCAL_SETUP.md) - Detailed guide for all local inference options
 
 ## Configuration
