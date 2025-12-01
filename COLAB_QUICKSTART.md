@@ -20,6 +20,12 @@ Copy and paste these cells into a new Google Colab notebook:
   --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
 
 !pip install -q huggingface-hub
+
+# Optional: Install Selenium for Facebook Marketplace & Mercari scraping
+# Note: This adds ~2 minutes to setup and makes processing 2x slower
+!pip install -q selenium undetected-chromedriver
+!apt-get update
+!apt-get install -y chromium-chromedriver chromium-browser
 ```
 
 ### Step 3: Download Model
@@ -58,16 +64,34 @@ claims_file = list(uploaded.keys())[0]
 print(f"Uploaded: {claims_file}")
 ```
 
-### Step 6: Process Claims
+### Step 6: Process Claims (with Optional Selenium for More Price Sources)
 
+**Option A: Fast Processing (eBay only)**
 ```python
-# Cell 5: Configure and run processing
+# Cell 5A: Configure and run processing (fast, eBay only)
 import os
 
 # Configure to use llama-cpp-python (no server needed!)
 os.environ['INFERENCE_BACKEND'] = 'llamacpp_python'
 os.environ['MODEL_PATH'] = model_path
 os.environ['N_GPU_LAYERS'] = '50'  # Use GPU acceleration
+
+# Process the claims
+!python -m claim_assist.main {claims_file}
+
+print("\n✅ Processing complete!")
+```
+
+**Option B: Comprehensive Processing (eBay + Facebook + Mercari) - SLOWER**
+```python
+# Cell 5B: Configure and run with Selenium (slow but more sources)
+import os
+
+# Configure to use llama-cpp-python + Selenium
+os.environ['INFERENCE_BACKEND'] = 'llamacpp_python'
+os.environ['MODEL_PATH'] = model_path
+os.environ['N_GPU_LAYERS'] = '50'
+os.environ['ENABLE_SELENIUM'] = 'true'  # ← Enable Facebook/Mercari scraping
 
 # Process the claims
 !python -m claim_assist.main {claims_file}
@@ -238,9 +262,12 @@ os.environ['N_GPU_LAYERS'] = '30'
 
 Want a ready-to-use notebook? [Open in Colab](https://colab.research.google.com/) and copy this full notebook:
 
+### Fast Version (eBay Only - Recommended)
+
 ```python
 # ======================================
 # Claim Assist - Google Colab Notebook
+# Fast Version (eBay only)
 # ======================================
 
 # 1. Install dependencies
@@ -269,6 +296,54 @@ import os
 os.environ['INFERENCE_BACKEND'] = 'llamacpp_python'
 os.environ['MODEL_PATH'] = model_path
 os.environ['N_GPU_LAYERS'] = '50'
+
+!python -m claim_assist.main {claims_file}
+
+# 6. Download results
+import glob
+for f in glob.glob("*_results.csv") + glob.glob("*_review.csv"):
+    files.download(f)
+```
+
+### Comprehensive Version (All Sources - Slower)
+
+```python
+# ======================================
+# Claim Assist - Google Colab Notebook
+# With Facebook Marketplace & Mercari
+# ======================================
+
+# 1. Install dependencies (including Selenium)
+!pip install -q llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+!pip install -q huggingface-hub selenium undetected-chromedriver
+
+# Install Chrome and chromedriver (Colab specific)
+!apt-get update
+!apt-get install -y chromium-chromedriver chromium-browser
+
+# 2. Download model
+from huggingface_hub import hf_hub_download
+model_path = hf_hub_download(
+    repo_id="bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+    filename="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+)
+
+# 3. Setup Claim Assist
+!git clone https://github.com/CamdenBibro/claim-assist.git
+%cd claim-assist
+!pip install -q -r requirements-minimal.txt
+
+# 4. Upload claims CSV
+from google.colab import files
+uploaded = files.upload()
+claims_file = list(uploaded.keys())[0]
+
+# 5. Configure with Selenium enabled
+import os
+os.environ['INFERENCE_BACKEND'] = 'llamacpp_python'
+os.environ['MODEL_PATH'] = model_path
+os.environ['N_GPU_LAYERS'] = '50'
+os.environ['ENABLE_SELENIUM'] = 'true'  # Enable Facebook/Mercari
 
 !python -m claim_assist.main {claims_file}
 

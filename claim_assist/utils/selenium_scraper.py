@@ -58,6 +58,8 @@ class SeleniumScraper:
         """Initialize Selenium WebDriver with undetected-chromedriver"""
         try:
             import undetected_chromedriver as uc
+            from selenium.webdriver.chrome.service import Service
+            import os
             
             options = uc.ChromeOptions()
             
@@ -74,14 +76,60 @@ class SeleniumScraper:
             # Random user agent
             options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             
-            self.driver = uc.Chrome(options=options)
+            # Google Colab specific: Set Chrome binary location
+            try:
+                # Check if running in Colab
+                import google.colab
+                # Colab uses chromium-browser from apt
+                chrome_paths = [
+                    '/usr/bin/chromium-browser',
+                    '/usr/bin/chromium',
+                    '/usr/bin/google-chrome',
+                    '/snap/bin/chromium'
+                ]
+                
+                for chrome_path in chrome_paths:
+                    if os.path.exists(chrome_path):
+                        options.binary_location = chrome_path
+                        logger.info(f"Running in Google Colab, using Chrome at: {chrome_path}")
+                        break
+                else:
+                    logger.warning("Chrome binary not found in Colab, letting undetected-chromedriver auto-detect")
+            except ImportError:
+                # Not in Colab, let undetected-chromedriver find Chrome
+                pass
+            
+            # Try to find chromedriver
+            chromedriver_path = None
+            possible_paths = [
+                '/usr/bin/chromedriver',
+                '/usr/local/bin/chromedriver',
+                'chromedriver'
+            ]
+            
+            for path in possible_paths:
+                if os.path.exists(path):
+                    chromedriver_path = path
+                    break
+            
+            if chromedriver_path:
+                logger.info(f"Using chromedriver at: {chromedriver_path}")
+                self.driver = uc.Chrome(
+                    options=options,
+                    driver_executable_path=chromedriver_path
+                )
+            else:
+                # Let undetected-chromedriver auto-download
+                self.driver = uc.Chrome(options=options)
+            
             logger.info("Selenium WebDriver initialized successfully")
             
-        except ImportError:
-            raise ImportError(
-                "Selenium scraper requires additional packages. Install with:\n"
-                "pip install selenium undetected-chromedriver"
-            )
+        except ImportError as e:
+            if "google.colab" not in str(e):
+                raise ImportError(
+                    "Selenium scraper requires additional packages. Install with:\n"
+                    "pip install selenium undetected-chromedriver"
+                )
         except Exception as e:
             logger.error(f"Failed to initialize WebDriver: {e}")
             raise
