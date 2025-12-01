@@ -113,7 +113,7 @@ STATISTICAL DATA:
 Total comparables: {len(price_list)}
 Price range: ${min(price_list):.2f} - ${max(price_list):.2f}
 Median price: ${statistics.median(price_list):.2f}
-75th percentile: ${statistics.quantiles(price_list, n=4)[2]:.2f if len(price_list) >= 4 else statistics.median(price_list):.2f}
+75th percentile: ${statistics.quantiles(price_list, n=4)[2] if len(price_list) >= 4 else statistics.median(price_list):.2f}
 
 INSTRUCTIONS:
 1. Calculate a fair replacement value using insurance industry standards (75th percentile preferred)

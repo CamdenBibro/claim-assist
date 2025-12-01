@@ -56,8 +56,8 @@ def main():
     )
     parser.add_argument(
         "--inference-backend",
-        choices=["llamacpp", "llamacpp_python", "openai_compatible", "transformers", "anthropic"],
-        help="Local inference backend to use (default: llamacpp)"
+        choices=["llamacpp_python", "anthropic"],
+        help="Inference backend to use (default: llamacpp_python)"
     )
     parser.add_argument(
         "--model-name",
@@ -73,12 +73,8 @@ def main():
         help="Number of layers to offload to GPU (for llamacpp_python, -1 for all)"
     )
     parser.add_argument(
-        "--inference-url",
-        help="Base URL for inference API (for llamacpp/openai_compatible backends)"
-    )
-    parser.add_argument(
         "--api-key",
-        help="API key for inference or legacy Anthropic API"
+        help="API key for Anthropic API"
     )
     parser.add_argument(
         "--no-cache",
@@ -106,14 +102,8 @@ def main():
             config.model_path = args.model_path
         if args.n_gpu_layers:
             config.n_gpu_layers = args.n_gpu_layers
-        if args.inference_url:
-            config.inference_base_url = args.inference_url
         if args.api_key:
-            # Support both new inference API key and legacy Anthropic key
-            if config.inference_backend == "anthropic":
-                config.anthropic_api_key = args.api_key
-            else:
-                config.inference_api_key = args.api_key
+            config.anthropic_api_key = args.api_key
         if args.threshold:
             config.value_threshold = args.threshold
         if args.no_cache:
@@ -124,10 +114,9 @@ def main():
 
     except ValueError as e:
         print(f"Configuration error: {e}", file=sys.stderr)
-        print("\nFor local inference, make sure your model server is running.")
-        print("For llama.cpp server: Start server on port 8080 - see LLAMACPP_AMD_SETUP.md")
+        print("\nSetup instructions:")
         print("For llama-cpp-python: Set MODEL_PATH environment variable - see COLAB_QUICKSTART.md")
-        print("For Anthropic (legacy): set ANTHROPIC_API_KEY environment variable")
+        print("For Anthropic: Set ANTHROPIC_API_KEY environment variable")
         sys.exit(1)
 
     # Initialize processor
@@ -136,8 +125,8 @@ def main():
     if config.inference_backend == "llamacpp_python":
         print(f"Model path: {config.model_path}")
         print(f"GPU layers: {config.n_gpu_layers}")
-    elif config.inference_backend != "anthropic":
-        print(f"Inference URL: {config.inference_base_url}")
+    elif config.inference_backend == "anthropic":
+        print("Using Anthropic API")
     
     processor = ClaimProcessor(config)
 

@@ -20,29 +20,22 @@ def create_inference_client(config: Config) -> LocalInferenceClient:
     Raises:
         ValueError: If configuration is invalid or backend is unavailable
     """
-    # Handle legacy Anthropic setup
+    # Handle Anthropic API
     if config.inference_backend == "anthropic":
         return _create_anthropic_wrapper(config)
     
-    # Create local inference client
-    kwargs = {
-        "base_url": config.inference_base_url,
-        "api_key": config.inference_api_key
-    }
+    # Handle llamacpp_python (local GGUF model)
+    elif config.inference_backend == "llamacpp_python":
+        return InferenceClientFactory.create_client(
+            backend_type="llamacpp_python",
+            model_name=config.model_name,
+            model_path=config.model_path,
+            n_gpu_layers=config.n_gpu_layers,
+            n_ctx=config.n_ctx
+        )
     
-    # Add llamacpp_python specific parameters
-    if config.inference_backend == "llamacpp_python":
-        kwargs.update({
-            "model_path": config.model_path,
-            "n_gpu_layers": config.n_gpu_layers,
-            "n_ctx": config.n_ctx
-        })
-    
-    return InferenceClientFactory.create_client(
-        backend_type=config.inference_backend,
-        model_name=config.model_name,
-        **kwargs
-    )
+    else:
+        raise ValueError(f"Unsupported backend: {config.inference_backend}")
 
 
 def create_anthropic_client(config: Config):
@@ -70,9 +63,10 @@ def _create_anthropic_wrapper(config: Config) -> LocalInferenceClient:
 class AnthropicWrapper(LocalInferenceClient):
     """Wrapper to make Anthropic API compatible with LocalInferenceClient interface"""
     
-    def __init__(self, anthropic_client, model: str = "claude-3-5-haiku-latest"):
+    def __init__(self, anthropic_client, model: str = "claude-3-5-haiku-20241022"):
         self.client = anthropic_client
         self.model = model
+        self._model_name = model  # Store for compatibility
     
     def generate(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.1):
         """Generate response using Anthropic API"""

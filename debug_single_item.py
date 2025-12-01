@@ -2,14 +2,25 @@
 """
 Debug script to test pricing on a single item
 Run: python3 debug_single_item.py
+
+Usage:
+  # With local llama-cpp-python:
+  set MODEL_PATH=path/to/model.gguf
+  python debug_single_item.py
+  
+  # With Anthropic API:
+  set INFERENCE_BACKEND=anthropic
+  set ANTHROPIC_API_KEY=your-key
+  python debug_single_item.py
 """ 
 
 import os
-from src.config import Config
-from src.models.item import ClaimItem
-from src.processors import ClaimProcessor
-from src.utils import create_anthropic_client
-from src.pricing import ItemClassifier, PriceResearcher, PriceValidator
+from claim_assist.config import Config
+from claim_assist.models.item import ClaimItem
+from claim_assist.processors import ClaimProcessor
+from claim_assist.utils import create_inference_client
+from claim_assist.utils.web_scraping import WebScrapingService
+from claim_assist.pricing import ItemClassifier, PriceResearcher, PriceValidator
 
 
 def debug_single_item():
@@ -32,16 +43,35 @@ def debug_single_item():
     print("="*60)
     print("DEBUGGING SINGLE ITEM")
     print("="*60)
+    print(f"Backend: {config.inference_backend}")
+    print(f"Model: {config.model_name}")
     print(f"Item: {test_item.description}")
     print(f"Brand: {test_item.brand}")
     print(f"Condition: {test_item.condition}")
     print(f"Estimated Value: ${test_item.estimated_value}")
     print("="*60)
 
-    # Initialize components
-    client = create_anthropic_client(config)
-    classifier = ItemClassifier(client, config.routing_model)
-    researcher = PriceResearcher(client, config.simple_research_model, config.complex_research_model)
+    # Initialize components (matching ClaimProcessor initialization)
+    inference_client = create_inference_client(config)
+    
+    # Check if client is available
+    if not inference_client.is_available():
+        print("\n⚠️ WARNING: Inference client is not available!")
+        print("Please check your setup:")
+        if config.inference_backend == "llamacpp_python":
+            print(f"  - Is MODEL_PATH set correctly? Current: {config.model_path}")
+            print(f"  - Does the model file exist?")
+        elif config.inference_backend == "anthropic":
+            print("  - Is ANTHROPIC_API_KEY set correctly?")
+        return
+    
+    web_scraper = WebScrapingService(
+        use_alternative_sources=config.enable_alternative_sources,
+        use_selenium=config.enable_selenium_scraping
+    )
+    
+    classifier = ItemClassifier(inference_client)
+    researcher = PriceResearcher(inference_client, web_scraper)
     validator = PriceValidator(config)
 
     # Step 1: Classify

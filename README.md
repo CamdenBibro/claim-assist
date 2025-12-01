@@ -2,17 +2,19 @@
 
 LLM-powered insurance claim adjuster that automates item valuation using web search and comparable pricing analysis.
 
-**NEW**: Now supports local inference models (llama.cpp, vLLM, Transformers) as an alternative to cloud APIs! **llama.cpp optimized for both NVIDIA and AMD GPUs.**
+**Two Simple Modes:**
+1. **Local Inference** (Free, GPU-accelerated) - llama-cpp-python
+2. **Cloud API** (Fast, paid) - Anthropic Claude
 
 ## Features
 
-- **Local & Cloud Inference**: Run with local models (llama.cpp, vLLM) or cloud APIs (Claude)
-- **GPU Optimized**: Native llama.cpp support with CUDA (NVIDIA) and ROCm (AMD) for superior performance
-- **MCP Web Scraping**: Direct web scraping of eBay and marketplace sites instead of relying on API web search
+- **Flexible Inference**: Run locally with llama-cpp-python or use Anthropic's cloud API
+- **GPU Optimized**: Native CUDA/ROCm support for superior local performance
+- **MCP Web Scraping**: Direct web scraping of eBay marketplace instead of relying on API web search
 - **Intelligent Routing**: Classifies items by complexity (simple/moderate/complex) to optimize costs
 - **Insurance Industry Standards**: Applies 75th percentile pricing and outlier detection  
 - **Cost Optimization**: Uses simple heuristics for low-value items, deep research for high-value items
-- **Caching**: Reduces processing by caching similar items
+- **Caching**: Reduces duplicate processing
 - **Human Review Flagging**: Automatically flags items needing adjuster review
 
 ## Quick Start
@@ -29,7 +31,7 @@ Process claims in the cloud with free GPU access:
 
 ---
 
-### Option 2: Local Inference with llama-cpp-python (Simple Python Library)
+### Option 2: Local Inference with llama-cpp-python (Recommended for Local Use)
 
 ```powershell
 # Install with CUDA support (NVIDIA GPUs)
@@ -37,64 +39,38 @@ pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-c
 
 # Download model
 pip install huggingface-hub
-python -c "from huggingface_hub import hf_hub_download; hf_hub_download('bartowski/Meta-Llama-3.1-8B-Instruct-GGUF', 'Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf')"
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download('bartowski/Meta-Llama-3.1-8B-Instruct-GGUF', 'Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf', local_dir='models')"
 
 # Install claim-assist
 pip install -r requirements-minimal.txt
 
 # Configure and run
 $env:INFERENCE_BACKEND="llamacpp_python"
-$env:MODEL_PATH="path/to/downloaded/model.gguf"
-$env:N_GPU_LAYERS="50"
+$env:MODEL_PATH="models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+$env:N_GPU_LAYERS="50"  # Use -1 for all layers
 python -m claim_assist.main example_claims.csv
 ```
 
 ---
 
-### Option 3: Local Inference with llama.cpp Server (Advanced - More Control)
-
-```powershell
-# See LLAMACPP_AMD_SETUP.md for detailed GPU setup (NVIDIA or AMD)
-# Quick version:
-
-# For NVIDIA GPUs:
-# 1. Install CUDA Toolkit from nvidia.com
-# 2. Build: cmake .. -DLLAMA_CUDA=ON
-
-# For AMD GPUs:
-# 1. Install ROCm from AMD
-# 2. Build: cmake .. -DLLAMA_HIPBLAS=ON -DAMDGPU_TARGETS=gfx1030
-
-# 3. Download a GGUF model and start server
-.\server.exe -m model.gguf -ngl 40 --port 8080
-
-# 4. Install dependencies and run
-pip install -r requirements-minimal.txt
-$env:INFERENCE_BACKEND="llamacpp"
-python -m claim_assist.main example_claims.csv
-```
-
----
-
-### Option 4: Cloud API (Legacy)
+### Option 3: Anthropic Cloud API
 
 ```bash
-# Install full dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Set API key
+# Set configuration
+export INFERENCE_BACKEND="anthropic"
 export ANTHROPIC_API_KEY="your-api-key-here"
 
 # Run processing  
-python -m claim_assist.main example_claims.csv --inference-backend anthropic
+python -m claim_assist.main example_claims.csv
 ```
 
 **Setup Guides:**
 - 🎯 [COLAB_QUICKSTART.md](COLAB_QUICKSTART.md) - **Start here! Free cloud GPUs, zero setup!**
 - ☁️ [CLOUD_DEPLOYMENT.md](CLOUD_DEPLOYMENT.md) - **More cloud options (RunPod, AWS, etc.)**
-- 🐍 [How to use llama-cpp-python](#option-2-local-inference-with-llama-cpp-python-simple-python-library) - **Simple Python library, no server needed**
-- 🚀 [LLAMACPP_AMD_SETUP.md](LLAMACPP_AMD_SETUP.md) - **GPU users (NVIDIA/AMD) with C++ server**
-- 📖 [LOCAL_SETUP.md](LOCAL_SETUP.md) - Detailed guide for all local inference options
+- 📖 [LOCAL_SETUP.md](LOCAL_SETUP.md) - Detailed guide for local inference
 
 ## Configuration
 
