@@ -92,8 +92,15 @@ class MCPWebScraper:
             soup = BeautifulSoup(response.content, 'html.parser')
             results = []
             
-            # Parse eBay search results
-            items = soup.find_all('div', class_=['s-item', 'srp-results'])
+            # Parse eBay search results - eBay now uses s-card structure
+            # Find the results list and get all card items
+            results_list = soup.find('ul', class_='srp-results')
+            if not results_list:
+                logger.warning("No results list found in eBay HTML")
+                return results
+            
+            items = results_list.find_all('li', class_='s-card')
+            logger.debug(f"Found {len(items)} eBay card items")
             
             for item in items[:self.max_results]:
                 try:
@@ -112,16 +119,20 @@ class MCPWebScraper:
             return []
     
     def _extract_ebay_price(self, item_element) -> Optional[PriceResult]:
-        """Extract price information from eBay item element"""
+        """Extract price information from eBay item element (s-card structure)"""
         try:
-            # Find title
-            title_elem = item_element.find(['h3', 'a'], class_=['s-item__title', 'it-ttl'])
+            # Find title - now in div.s-card__title
+            title_elem = item_element.find('div', class_='s-card__title')
             if not title_elem:
                 return None
             title = title_elem.get_text(strip=True)
             
-            # Find price
-            price_elem = item_element.find('span', class_=['notranslate', 's-item__price'])
+            # Skip if title is empty or a placeholder
+            if not title or len(title) < 5:
+                return None
+            
+            # Find price - now in span.s-card__price
+            price_elem = item_element.find('span', class_='s-card__price')
             if not price_elem:
                 return None
             
@@ -130,18 +141,31 @@ class MCPWebScraper:
             if not price:
                 return None
             
-            # Find URL
-            link_elem = item_element.find('a', class_='s-item__link')
+            # Find URL - first a.s-card__link
+            link_elem = item_element.find('a', class_='s-card__link')
             url = link_elem.get('href', '') if link_elem else ''
             
-            # Find condition
-            condition_elem = item_element.find(['span'], class_=['SECONDARY_INFO', 's-item__subtitle'])
-            condition = condition_elem.get_text(strip=True) if condition_elem else None
+            # Find condition - look for span with condition text
+            condition = None
+            condition_keywords = ['New', 'Used', 'Refurbished', 'Open Box', 'For Parts']
+            for span in item_element.find_all('span', class_='su-styled-text'):
+                text = span.get_text(strip=True)
+                if any(keyword in text for keyword in condition_keywords):
+                    condition = text
+                    break
             
-            # Find shipping
-            shipping_elem = item_element.find('span', class_='s-item__shipping')
-            shipping_text = shipping_elem.get_text(strip=True) if shipping_elem else ''
-            shipping = self._parse_price(shipping_text) if 'shipping' in shipping_text.lower() else None
+            # Find shipping - look for "Free" or shipping cost
+            shipping = None
+            shipping_text = ''
+            for span in item_element.find_all('span', class_='su-styled-text'):
+                text = span.get_text(strip=True)
+                if 'shipping' in text.lower() or 'delivery' in text.lower():
+                    shipping_text = text
+                    if 'free' in text.lower():
+                        shipping = 0.0
+                    else:
+                        shipping = self._parse_price(text)
+                    break
             
             return PriceResult(
                 source="eBay",

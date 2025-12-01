@@ -44,15 +44,28 @@ class PriceResearcher:
             all_price_results = []
             used_queries = []
             
+            print(f"🔍 Searching for comparable prices using {len(search_queries)} queries...")
+            
             for query in search_queries[:3]:  # Limit to 3 queries to avoid rate limiting
                 try:
+                    print(f"   Searching: '{query}'")
                     results = self.web_scraper.search_comparable_prices(query, max_results=10)
+                    print(f"   Found {len(results)} results")
+                    
                     if results:
                         all_price_results.extend(results)
                         used_queries.append(query)
+                        
+                        # Show first few results
+                        for r in results[:3]:
+                            print(f"      - {r.source}: ${r.price:.2f} - {r.title[:50]}")
                 except Exception as e:
-                    print(f"Failed to search for '{query}': {e}")
+                    print(f"   ❌ Failed to search for '{query}': {e}")
+                    import traceback
+                    traceback.print_exc()
                     continue
+            
+            print(f"📊 Total comparable prices found: {len(all_price_results)}")
 
             # Step 3: Analyze results with local LLM
             if all_price_results:
