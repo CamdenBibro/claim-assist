@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import List
+from tqdm import tqdm
 from ..models.item import ClaimItem, PricingResult, Condition
 from ..pricing import ItemClassifier, PriceResearcher, PriceValidator
 from ..utils import ItemCache, create_inference_client
@@ -28,7 +29,8 @@ class ClaimProcessor:
         
         # Initialize web scraping service
         self.web_scraper = WebScrapingService(
-            use_alternative_sources=config.enable_alternative_sources
+            use_alternative_sources=config.enable_alternative_sources,
+            use_selenium=config.enable_selenium_scraping
         )
         # Configure scraping delays
         self.web_scraper.main_scraper.delay = config.scraping_delay
@@ -76,16 +78,13 @@ class ClaimProcessor:
 
         print(f"Processing {total_items} items...")
 
-        for idx, row in df.iterrows():
+        # Use tqdm for progress bar
+        for idx, row in tqdm(df.iterrows(), total=total_items, desc="Processing claims", unit="item"):
             item = self._row_to_claim_item(row)
             result = self.process_item(item)
             results.append(result)
 
-            # Progress tracking
-            if (idx + 1) % 10 == 0:
-                print(f"Processed {idx + 1}/{total_items} items")
-
-        print(f"Completed processing all {total_items} items")
+        print(f"\nCompleted processing all {total_items} items")
 
         self.results = results
         # Convert to dict for DataFrame

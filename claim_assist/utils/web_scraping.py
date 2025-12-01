@@ -59,13 +59,15 @@ class MCPWebScraper:
         except Exception as e:
             logger.warning(f"eBay search failed for '{query}': {e}")
         
-        # Search Facebook Marketplace
-        try:
-            facebook_results = self._search_facebook_marketplace(query)
-            all_results.extend(facebook_results)
-            time.sleep(self.delay)
-        except Exception as e:
-            logger.warning(f"Facebook Marketplace search failed for '{query}': {e}")
+        # Search Facebook Marketplace (DISABLED - Facebook blocks automated scraping)
+        # Facebook returns 400 errors and doesn't allow bots
+        # Uncomment and use alternative methods (Selenium, API) if needed
+        # try:
+        #     facebook_results = self._search_facebook_marketplace(query)
+        #     all_results.extend(facebook_results)
+        #     time.sleep(self.delay)
+        # except Exception as e:
+        #     logger.warning(f"Facebook Marketplace search failed for '{query}': {e}")
         
         return all_results
     
@@ -304,9 +306,18 @@ class AlternativeSourceScraper:
 class WebScrapingService:
     """Main web scraping service that coordinates different scrapers"""
     
-    def __init__(self, use_alternative_sources: bool = True):
+    def __init__(self, use_alternative_sources: bool = True, use_selenium: bool = False):
+        """
+        Initialize web scraping service
+        
+        Args:
+            use_alternative_sources: Enable Craigslist as alternative
+            use_selenium: Enable Selenium for Facebook/Mercari (slower but bypasses blocks)
+        """
         self.main_scraper = MCPWebScraper()
         self.alt_scraper = AlternativeSourceScraper() if use_alternative_sources else None
+        self.use_selenium = use_selenium
+        self.selenium_scraper = None
     
     def search_comparable_prices(self, query: str, max_results: int = 20) -> List[PriceResult]:
         """
@@ -321,9 +332,27 @@ class WebScrapingService:
         """
         all_results = []
         
-        # Search main sources (eBay, Facebook)
+        # Search main sources (eBay - always works)
         main_results = self.main_scraper.search_all_sources(query)
         all_results.extend(main_results)
+        
+        # Use Selenium for Facebook Marketplace and Mercari if enabled
+        if self.use_selenium:
+            try:
+                from .selenium_scraper import get_selenium_scraper
+                
+                with get_selenium_scraper(headless=True, max_results=10) as selenium_scraper:
+                    selenium_results = selenium_scraper.search_all_sources(query)
+                    all_results.extend(selenium_results)
+                    logger.info(f"Selenium found {len(selenium_results)} additional results")
+            
+            except ImportError:
+                logger.warning(
+                    "Selenium scraper not available. Install with: "
+                    "pip install selenium undetected-chromedriver"
+                )
+            except Exception as e:
+                logger.warning(f"Selenium scraping failed: {e}")
         
         # Search alternative sources if enabled and we need more results
         if self.alt_scraper and len(all_results) < max_results:

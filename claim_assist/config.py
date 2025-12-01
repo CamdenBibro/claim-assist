@@ -44,6 +44,7 @@ class Config:
     scraping_delay: float = 1.0  # Delay between requests (seconds)
     max_results_per_source: int = 10
     enable_alternative_sources: bool = True  # Craigslist as alternative to Facebook
+    enable_selenium_scraping: bool = False  # Use Selenium for Facebook/Mercari (slower but bypasses blocks)
     craigslist_location: str = "sfbay"  # Default Craigslist location
 
     # Output settings
@@ -85,6 +86,7 @@ class Config:
             scraping_delay=float(parse_env_value("SCRAPING_DELAY", "1.0")),
             max_results_per_source=int(parse_env_value("MAX_RESULTS_PER_SOURCE", "10")),
             enable_alternative_sources=parse_env_value("ENABLE_ALT_SOURCES", "true").lower() == "true",
+            enable_selenium_scraping=parse_env_value("ENABLE_SELENIUM", "false").lower() == "true",
             craigslist_location=parse_env_value("CRAIGSLIST_LOCATION", "sfbay")
         )
 
