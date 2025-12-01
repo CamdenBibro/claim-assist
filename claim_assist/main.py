@@ -32,7 +32,7 @@ def print_summary(summary: dict) -> None:
 def main():
     """Main entry point"""
     parser = argparse.ArgumentParser(
-        description="Process insurance claims with LLM-powered pricing research"
+        description="Process insurance claims with local LLM-powered pricing research"
     )
     parser.add_argument(
         "input_csv",
@@ -55,8 +55,21 @@ def main():
         help="Value threshold for deep research vs simple pricing (default: 100)"
     )
     parser.add_argument(
+        "--inference-backend",
+        choices=["ollama", "openai_compatible", "transformers", "anthropic"],
+        help="Local inference backend to use (default: ollama)"
+    )
+    parser.add_argument(
+        "--model-name",
+        help="Name of the model to use (e.g., llama3.1:8b, gpt-3.5-turbo)"
+    )
+    parser.add_argument(
+        "--inference-url",
+        help="Base URL for inference API (for ollama/openai_compatible backends)"
+    )
+    parser.add_argument(
         "--api-key",
-        help="Anthropic API key (can also use ANTHROPIC_API_KEY env var)"
+        help="API key for inference or legacy Anthropic API"
     )
     parser.add_argument(
         "--no-cache",
@@ -76,8 +89,18 @@ def main():
         config = Config.from_env()
 
         # Override with command line arguments
+        if args.inference_backend:
+            config.inference_backend = args.inference_backend
+        if args.model_name:
+            config.model_name = args.model_name
+        if args.inference_url:
+            config.inference_base_url = args.inference_url
         if args.api_key:
-            config.anthropic_api_key = args.api_key
+            # Support both new inference API key and legacy Anthropic key
+            if config.inference_backend == "anthropic":
+                config.anthropic_api_key = args.api_key
+            else:
+                config.inference_api_key = args.api_key
         if args.threshold:
             config.value_threshold = args.threshold
         if args.no_cache:
@@ -88,11 +111,17 @@ def main():
 
     except ValueError as e:
         print(f"Configuration error: {e}", file=sys.stderr)
-        print("\nPlease set ANTHROPIC_API_KEY environment variable or use --api-key option")
+        print("\nFor local inference, make sure your model server is running.")
+        print("For Ollama: run 'ollama serve' and 'ollama pull llama3.1:8b'")
+        print("For Anthropic (legacy): set ANTHROPIC_API_KEY environment variable")
         sys.exit(1)
 
     # Initialize processor
-    print("Initializing Claim Assist processor...")
+    print(f"Initializing Claim Assist processor with {config.inference_backend} backend...")
+    print(f"Using model: {config.model_name}")
+    if config.inference_backend != "anthropic":
+        print(f"Inference URL: {config.inference_base_url}")
+    
     processor = ClaimProcessor(config)
 
     # Process claims

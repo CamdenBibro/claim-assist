@@ -1,25 +1,27 @@
 import json
+import statistics
 from typing import Dict, List
-import anthropic
 from ..models.item import ClaimItem, Complexity
+from ..utils.local_inference import LocalInferenceClient
+from ..utils.web_scraping import WebScrapingService, generate_search_queries
 
 
 class PriceResearcher:
-    """Researches comparable prices using LLM with web search capabilities"""
+    """Researches comparable prices using local LLM with MCP web scraping"""
 
     def __init__(
         self,
-        client: anthropic.Anthropic,
-        simple_model: str = "claude-3-5-haiku-latest",
-        complex_model: str =  "claude-sonnet-4-5-20250929" #"claude-3-5-haiku-latest"
+        inference_client: LocalInferenceClient,
+        web_scraping_service: WebScrapingService,
+        use_complex_model_for_complex_items: bool = True
     ):
-        self.client = client
-        self.simple_model = simple_model
-        self.complex_model = complex_model
+        self.client = inference_client
+        self.web_scraper = web_scraping_service
+        self.use_complex_model = use_complex_model_for_complex_items
 
     def research(self, item: ClaimItem, complexity: str) -> Dict:
         """
-        Research comparable prices for an item
+        Research comparable prices for an item using web scraping + local LLM analysis
 
         Args:
             item: ClaimItem to research
@@ -30,163 +32,144 @@ class PriceResearcher:
         """
         item_dict = item.to_dict()
 
-        search_prompt = f"""You are an insurance claim adjuster. Use web search to find replacement costs.
-
-ITEM: {item_dict['description']}
-BRAND: {item_dict.get('brand', 'unbranded')}
-CONDITION: {item_dict.get('condition', 'used')}
-AGE: {item_dict.get('age', 'unknown')}
-
-Search ONLY eBay, Facebook Marketplace. Find 5-10 comparable prices. Do not include refurbished or auction prices. For ebay, only used items final sale or buy it now prices.
-
-CRITICAL: Return ONLY this exact JSON format with NO additional text before or after:
-{{
-"price_sources":[{{"source":"source name","price":actual_price_number}},...],
-"recommended_value":calculated_median_or_average,
-"confidence":"low|medium|high",
-"reasoning":"Brief explanation of how you arrived at this price",
-"search_queries_used":["actual search query you used"]
-}}
-
-Rules:
-- NO markdown formatting
-- NO explanatory text outside the JSON
-- Use double quotes for strings
-- Numbers must not be quoted (use raw numbers like 650, not "650")
-- Include ALL prices you found in price_sources array
-- recommended_value should be the median or average of the prices found
-- Array items separated by commas only"""
-
-        # Use Sonnet for complex items, Haiku for simple/moderate
-        model = self.complex_model if complexity == Complexity.COMPLEX.value else self.simple_model
-
         try:
-            message = self.client.messages.create(
-                model=model,
-                max_tokens=2000,
-                messages=[{"role": "user", "content": search_prompt}],
-                tools=[{
-                    "type": "web_search_20250305",
-                    "name": "web_search",
-                    "max_uses": 5
-                }]
+            # Step 1: Generate search queries
+            search_queries = generate_search_queries(
+                item_description=item_dict['description'],
+                brand=item_dict.get('brand'),
+                model=None  # Could be extracted from description in the future
             )
 
-            # Extract text content from the response
-            text_content = ""
-            for block in message.content:
-                if block.type == "text":
-                    text_content += block.text
+            # Step 2: Scrape web for comparable prices
+            all_price_results = []
+            used_queries = []
+            
+            for query in search_queries[:3]:  # Limit to 3 queries to avoid rate limiting
+                try:
+                    results = self.web_scraper.search_comparable_prices(query, max_results=10)
+                    if results:
+                        all_price_results.extend(results)
+                        used_queries.append(query)
+                except Exception as e:
+                    print(f"Failed to search for '{query}': {e}")
+                    continue
 
-            # Debug: print first 500 chars if extraction fails
-            if not text_content.strip():
-                raise ValueError("No text content in API response")
+            # Step 3: Analyze results with local LLM
+            if all_price_results:
+                analysis = self._analyze_prices_with_llm(item, all_price_results, complexity)
+                analysis['search_queries_used'] = used_queries
+                
+                # Add structured price data
+                formatted_results = self.web_scraper.format_results_for_llm(all_price_results)
+                analysis.update(formatted_results)
+                
+                return analysis
+            else:
+                # No results found - fallback
+                return self._fallback_result(item, "No comparable prices found in web search")
 
-            # Extract JSON from text (Claude may wrap it in explanation)
-            result = self._extract_json_from_text(text_content)
+        except Exception as e:
+            return self._fallback_result(item, f"Research failed: {str(e)}")
 
-            # Validate and clean result
-            result = self._validate_research_result(result)
+    def _analyze_prices_with_llm(self, item: ClaimItem, price_results: List, complexity: str) -> Dict:
+        """Use local LLM to analyze scraped price results"""
+        
+        item_dict = item.to_dict()
+        
+        # Prepare price data for LLM
+        price_list = [result.price for result in price_results]
+        source_info = []
+        for result in price_results:
+            source_info.append(f"- {result.source}: ${result.price:.2f} - {result.title[:80]}")
+        
+        price_summary = "\n".join(source_info[:15])  # Limit to avoid token overflow
+        
+        prompt = f"""You are an insurance claim adjuster analyzing comparable prices for item valuation.
 
+ITEM TO VALUE:
+Description: {item_dict['description']}
+Brand: {item_dict.get('brand', 'unknown')}
+Condition: {item_dict.get('condition', 'unknown')}
+Age: {item_dict.get('age', 'unknown')}
+Estimated Value: ${item_dict.get('estimated_value', 'unknown')}
+
+COMPARABLE PRICES FOUND:
+{price_summary}
+
+STATISTICAL DATA:
+Total comparables: {len(price_list)}
+Price range: ${min(price_list):.2f} - ${max(price_list):.2f}
+Median price: ${statistics.median(price_list):.2f}
+75th percentile: ${statistics.quantiles(price_list, n=4)[2]:.2f if len(price_list) >= 4 else statistics.median(price_list):.2f}
+
+INSTRUCTIONS:
+1. Calculate a fair replacement value using insurance industry standards (75th percentile preferred)
+2. Account for the item's condition and age
+3. Consider outliers and data quality
+4. Assign confidence level based on number and quality of comparables
+
+Respond with ONLY valid JSON in this exact format:
+{{
+    "recommended_value": calculated_replacement_value_number,
+    "confidence": "low|medium|high",
+    "reasoning": "Brief explanation of how you calculated the value and why"
+}}
+
+Confidence guidelines:
+- High: 5+ comparables, tight price range, high-quality sources
+- Medium: 3-4 comparables, reasonable price range  
+- Low: <3 comparables, wide price range, or questionable data
+
+Return only the JSON response, no other text."""
+
+        try:
+            response = self.client.generate(prompt, max_tokens=500, temperature=0.1)
+            
+            if not response.success:
+                raise Exception(response.error)
+            
+            # Parse JSON response
+            result = json.loads(response.content.strip())
+            
+            # Validate and set defaults
+            result.setdefault('recommended_value', statistics.median(price_list))
+            result.setdefault('confidence', 'medium')
+            result.setdefault('reasoning', 'LLM analysis of comparable prices')
+            
+            # Ensure recommended_value is a number
+            try:
+                result['recommended_value'] = float(result['recommended_value'])
+            except (ValueError, TypeError):
+                result['recommended_value'] = statistics.median(price_list)
+            
             return result
 
-        except (json.JSONDecodeError, anthropic.APIError) as e:
-            # Return fallback result with estimated value if available
-            return self._fallback_result(item, str(e))
+        except (json.JSONDecodeError, Exception) as e:
+            # Fallback to statistical analysis if LLM fails
+            return self._statistical_fallback_analysis(price_list, str(e))
 
-    def _extract_json_from_text(self, text: str) -> Dict:
-        """
-        Extract JSON object from text that may contain explanations
-
-        Args:
-            text: Text that may contain JSON and other content
-
-        Returns:
-            Parsed JSON dictionary
-        """
-        # Try direct JSON parsing first
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            pass
-
-        # Find the first { and matching } using bracket counting
-        start_idx = text.find('{')
-        if start_idx == -1:
-            raise json.JSONDecodeError("No JSON object found in response", text, 0)
-
-        bracket_count = 0
-        in_string = False
-        escape_next = False
-
-        for i in range(start_idx, len(text)):
-            char = text[i]
-
-            if escape_next:
-                escape_next = False
-                continue
-
-            if char == '\\':
-                escape_next = True
-                continue
-
-            if char == '"' and not escape_next:
-                in_string = not in_string
-                continue
-
-            if not in_string:
-                if char == '{':
-                    bracket_count += 1
-                elif char == '}':
-                    bracket_count -= 1
-                    if bracket_count == 0:
-                        # Found the matching closing bracket
-                        json_str = text[start_idx:i+1]
-                        try:
-                            return json.loads(json_str)
-                        except json.JSONDecodeError as e:
-                            raise json.JSONDecodeError(f"Invalid JSON extracted: {e}", json_str, 0)
-
-        # If we get here, no matching bracket was found
-        raise json.JSONDecodeError("Could not find matching closing bracket for JSON", text, start_idx)
-
-    def _validate_research_result(self, result: Dict) -> Dict:
-        """Validate and clean research results"""
-
-        # Handle new price_sources format or legacy format
-        if 'price_sources' in result:
-            # New format: list of {source, price} objects
-            price_sources = result.get('price_sources', [])
-            result['comparable_prices'] = [
-                float(item['price']) for item in price_sources
-                if isinstance(item, dict) and 'price' in item and item['price'] > 0
-            ]
-            result['sources'] = [
-                item['source'] for item in price_sources
-                if isinstance(item, dict) and 'source' in item
-            ]
-            # Store the structured data for detailed output
-            result['price_source_details'] = [
-                f"{item['source']}: ${float(item['price']):.2f}"
-                for item in price_sources
-                if isinstance(item, dict) and 'source' in item and 'price' in item
-            ]
+    def _statistical_fallback_analysis(self, prices: List[float], error: str) -> Dict:
+        """Fallback statistical analysis if LLM analysis fails"""
+        if not prices:
+            return {
+                'recommended_value': 0,
+                'confidence': 'low', 
+                'reasoning': f'No prices available for analysis. Error: {error}'
+            }
+        
+        # Use 75th percentile for insurance standard
+        if len(prices) >= 4:
+            recommended_value = statistics.quantiles(prices, n=4)[2]  # 75th percentile
+            confidence = 'medium' if len(prices) >= 5 else 'low'
         else:
-            # Legacy format: separate lists
-            result.setdefault('comparable_prices', [])
-            result.setdefault('sources', [])
-            result['comparable_prices'] = [
-                float(p) for p in result['comparable_prices']
-                if isinstance(p, (int, float)) and p > 0
-            ]
-            result['price_source_details'] = []
-
-        result.setdefault('recommended_value', 0)
-        result.setdefault('confidence', 'low')
-        result.setdefault('reasoning', 'No reasoning provided')
-        result.setdefault('search_queries_used', [])
-
-        return result
+            recommended_value = statistics.median(prices)
+            confidence = 'low'
+        
+        return {
+            'recommended_value': recommended_value,
+            'confidence': confidence,
+            'reasoning': f'Statistical analysis used due to LLM error: {error}. Used {"75th percentile" if len(prices) >= 4 else "median"} of {len(prices)} comparables.'
+        }
 
     def _fallback_result(self, item: ClaimItem, error: str) -> Dict:
         """Create fallback result when research fails"""
@@ -195,8 +178,11 @@ Rules:
         return {
             'comparable_prices': [estimated],
             'sources': ['Estimated value (research failed)'],
+            'price_sources': [{'source': 'Estimated', 'price': estimated}],
             'recommended_value': estimated,
             'confidence': 'low',
-            'reasoning': f'Research failed: {error}. Using estimated value.',
-            'search_queries_used': []
+            'reasoning': f'{error}. Using estimated value.',
+            'search_queries_used': [],
+            'price_source_details': [f'Estimated: ${estimated:.2f}']
         }
+

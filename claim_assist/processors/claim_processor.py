@@ -2,12 +2,13 @@ import pandas as pd
 from typing import List
 from ..models.item import ClaimItem, PricingResult, Condition
 from ..pricing import ItemClassifier, PriceResearcher, PriceValidator
-from ..utils import ItemCache, create_anthropic_client
+from ..utils import ItemCache, create_inference_client
+from ..utils.web_scraping import WebScrapingService
 from ..config import Config
 
 
 class ClaimProcessor:
-    """Processes insurance claims with LLM-powered pricing research"""
+    """Processes insurance claims with local LLM-powered pricing research"""
 
     def __init__(self, config: Config):
         """
@@ -17,14 +18,28 @@ class ClaimProcessor:
             config: Application configuration
         """
         self.config = config
-        self.client = create_anthropic_client(config)
+        
+        # Create local inference client
+        self.inference_client = create_inference_client(config)
+        
+        # Check if client is available
+        if not self.inference_client.is_available():
+            print("Warning: Inference client is not available. Please check your local model setup.")
+        
+        # Initialize web scraping service
+        self.web_scraper = WebScrapingService(
+            use_alternative_sources=config.enable_alternative_sources
+        )
+        # Configure scraping delays
+        self.web_scraper.main_scraper.delay = config.scraping_delay
+        self.web_scraper.main_scraper.max_results = config.max_results_per_source
 
         # Initialize pricing components
-        self.classifier = ItemClassifier(self.client, config.routing_model)
+        self.classifier = ItemClassifier(self.inference_client)
         self.researcher = PriceResearcher(
-            self.client,
-            config.simple_research_model,
-            config.complex_research_model
+            self.inference_client,
+            self.web_scraper,
+            use_complex_model_for_complex_items=True
         )
         self.validator = PriceValidator(config)
 

@@ -2,20 +2,52 @@
 
 LLM-powered insurance claim adjuster that automates item valuation using web search and comparable pricing analysis.
 
+**NEW**: Now supports local inference models (Ollama, vLLM, Transformers) as an alternative to cloud APIs!
+
 ## Features
 
-- **Intelligent Routing**: Classifies items by complexity (simple/moderate/complex) to optimize API costs
-- **Web-Powered Research**: Uses Claude with web search to find comparable prices from trusted marketplaces
-- **Insurance Industry Standards**: Applies 75th percentile pricing and outlier detection
+- **Local & Cloud Inference**: Run with local models (Ollama, vLLM) or cloud APIs (Claude)
+- **MCP Web Scraping**: Direct web scraping of eBay and marketplace sites instead of relying on API web search
+- **Intelligent Routing**: Classifies items by complexity (simple/moderate/complex) to optimize costs
+- **Insurance Industry Standards**: Applies 75th percentile pricing and outlier detection  
 - **Cost Optimization**: Uses simple heuristics for low-value items, deep research for high-value items
-- **Caching**: Reduces API calls by caching similar items
+- **Caching**: Reduces processing by caching similar items
 - **Human Review Flagging**: Automatically flags items needing adjuster review
 
-## Installation
+## Quick Start
+
+### Option 1: Local Inference (Recommended - No API costs!)
 
 ```bash
-pip install -r requirements.txt
+# Install Ollama
+brew install ollama  # macOS
+# or curl -fsSL https://ollama.ai/install.sh | sh  # Linux
+
+# Start Ollama and download model
+ollama serve
+ollama pull llama3.1:8b
+
+# Install minimal dependencies
+pip install -r requirements-minimal.txt
+
+# Run processing
+python -m claim_assist.main example_claims.csv
 ```
+
+### Option 2: Cloud API (Legacy)
+
+```bash
+# Install full dependencies
+pip install -r requirements.txt
+
+# Set API key
+export ANTHROPIC_API_KEY="your-api-key-here"
+
+# Run processing  
+python -m claim_assist.main example_claims.csv --inference-backend anthropic
+```
+
+See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed local inference setup.
 
 ## Configuration
 

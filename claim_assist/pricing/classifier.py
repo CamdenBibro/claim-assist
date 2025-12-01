@@ -1,15 +1,14 @@
 import json
 from typing import Dict
-import anthropic
 from ..models.item import ClaimItem, Complexity
+from ..utils.local_inference import LocalInferenceClient
 
 
 class ItemClassifier:
     """Classifies items by pricing complexity to route to appropriate pricing strategy"""
 
-    def __init__(self, client: anthropic.Anthropic, model: str = "claude-3-5-haiku-latest"):
-        self.client = client
-        self.model = model
+    def __init__(self, inference_client: LocalInferenceClient):
+        self.client = inference_client
 
     def classify(self, item: ClaimItem) -> Dict[str, str]:
         """
@@ -23,35 +22,45 @@ class ItemClassifier:
         """
         item_dict = item.to_dict()
 
-        prompt = f"""Classify this damaged item's pricing complexity:
+        prompt = f"""Classify this damaged item's pricing complexity for insurance claim valuation.
 
 Item: {item_dict['description']}
 Brand: {item_dict.get('brand', 'unknown')}
 Condition: {item_dict.get('condition', 'unknown')}
+Age: {item_dict.get('age', 'unknown')}
 
-Respond with JSON:
+Respond with ONLY valid JSON in this exact format:
 {{"complexity": "simple|moderate|complex", "reasoning": "brief explanation"}}
 
-Simple: Clear brand/model, readily available new
-Moderate: Generic item, available used market
-Complex: Vintage, custom, or rare items needing deep research"""
+Classification guidelines:
+- Simple: Clear brand/model, readily available new, mass-produced consumer goods (electronics, appliances, furniture from major brands)
+- Moderate: Generic items with available used market, common items without specific brand, standard household items
+- Complex: Vintage items, custom-made items, rare collectibles, antiques, one-of-a-kind pieces requiring specialized knowledge
+
+Examples:
+- "Samsung 55-inch TV" = simple (clear brand, readily available)
+- "Leather armchair" = moderate (generic furniture, used market exists) 
+- "1950s vintage oak dining table" = complex (vintage, requires specialized knowledge)
+
+Return only the JSON response, no other text."""
 
         try:
-            message = self.client.messages.create(
-                model=self.model,
-                max_tokens=200,
-                messages=[{"role": "user", "content": prompt}]
-            )
-
-            result = json.loads(message.content[0].text)
+            response = self.client.generate(prompt, max_tokens=200, temperature=0.1)
+            
+            if not response.success:
+                raise Exception(response.error)
+            
+            # Parse JSON response
+            result = json.loads(response.content.strip())
 
             # Validate complexity value
-            if result['complexity'] not in [c.value for c in Complexity]:
+            valid_complexities = [c.value for c in Complexity]
+            if result.get('complexity') not in valid_complexities:
                 result['complexity'] = Complexity.MODERATE.value
 
             return result
 
-        except (json.JSONDecodeError, KeyError, anthropic.APIError) as e:
+        except (json.JSONDecodeError, KeyError, Exception) as e:
             # Fallback to moderate complexity if classification fails
             return {
                 "complexity": Complexity.MODERATE.value,
