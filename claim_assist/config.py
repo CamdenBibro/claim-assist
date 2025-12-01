@@ -8,9 +8,9 @@ class Config:
     """Configuration for Claim Assist application"""
 
     # Local Inference Configuration
-    inference_backend: str = "ollama"  # ollama, openai_compatible, transformers
-    model_name: str = "llama3.1:8b"
-    inference_base_url: str = "http://localhost:11434"
+    inference_backend: str = "llamacpp"  # llamacpp, openai_compatible, transformers
+    model_name: str = "llama-3.1-8b-instruct"
+    inference_base_url: str = "http://localhost:8080/v1"
     inference_api_key: Optional[str] = None  # For OpenAI-compatible APIs
     
     # Legacy API Keys (deprecated, for backward compatibility)
@@ -58,9 +58,9 @@ class Config:
 
         return cls(
             # Local inference settings
-            inference_backend=parse_env_value("INFERENCE_BACKEND", "ollama"),
-            model_name=parse_env_value("MODEL_NAME", "llama3.1:8b"),
-            inference_base_url=parse_env_value("INFERENCE_BASE_URL", "http://localhost:11434"),
+            inference_backend=parse_env_value("INFERENCE_BACKEND", "llamacpp"),
+            model_name=parse_env_value("MODEL_NAME", "llama-3.1-8b-instruct"),
+            inference_base_url=parse_env_value("INFERENCE_BASE_URL", "http://localhost:8080/v1"),
             inference_api_key=parse_env_value("INFERENCE_API_KEY", ""),
             
             # Legacy settings (for backward compatibility)
@@ -88,13 +88,13 @@ class Config:
             raise ValueError("INFERENCE_API_KEY is required when using openai_compatible backend")
         
         # Validate backend type
-        valid_backends = ["ollama", "openai_compatible", "transformers", "anthropic"]
+        valid_backends = ["llamacpp", "openai_compatible", "transformers", "anthropic"]
         if self.inference_backend not in valid_backends:
             raise ValueError(f"Invalid inference backend: {self.inference_backend}. Must be one of: {valid_backends}")
 
 
 # Default configuration
 DEFAULT_CONFIG = Config(
-    inference_backend="ollama",
-    model_name="llama3.1:8b"
+    inference_backend="llamacpp",
+    model_name="llama-3.1-8b-instruct"
 )

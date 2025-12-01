@@ -7,8 +7,9 @@ beautifulsoup4>=4.12.0
 lxml>=4.9.0
 
 # Local inference backends (optional - install based on your choice)
-# For Ollama (recommended for local inference)
-# No additional packages required - uses requests to communicate with Ollama server
+# For llama.cpp (recommended for local inference, especially AMD GPUs)
+# No additional packages required - uses requests to communicate with llama.cpp server
+# See LLAMACPP_AMD_SETUP.md for setup instructions
 
 # For Transformers (CPU/GPU local inference)
 torch>=2.0.0

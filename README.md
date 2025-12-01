@@ -2,11 +2,12 @@
 
 LLM-powered insurance claim adjuster that automates item valuation using web search and comparable pricing analysis.
 
-**NEW**: Now supports local inference models (Ollama, vLLM, Transformers) as an alternative to cloud APIs!
+**NEW**: Now supports local inference models (llama.cpp, vLLM, Transformers) as an alternative to cloud APIs! **llama.cpp optimized for both NVIDIA and AMD GPUs.**
 
 ## Features
 
-- **Local & Cloud Inference**: Run with local models (Ollama, vLLM) or cloud APIs (Claude)
+- **Local & Cloud Inference**: Run with local models (llama.cpp, vLLM) or cloud APIs (Claude)
+- **GPU Optimized**: Native llama.cpp support with CUDA (NVIDIA) and ROCm (AMD) for superior performance
 - **MCP Web Scraping**: Direct web scraping of eBay and marketplace sites instead of relying on API web search
 - **Intelligent Routing**: Classifies items by complexity (simple/moderate/complex) to optimize costs
 - **Insurance Industry Standards**: Applies 75th percentile pricing and outlier detection  
@@ -16,21 +17,26 @@ LLM-powered insurance claim adjuster that automates item valuation using web sea
 
 ## Quick Start
 
-### Option 1: Local Inference (Recommended - No API costs!)
+### Option 1: Local Inference with llama.cpp (Recommended - Optimized for All GPUs!)
 
-```bash
-# Install Ollama
-brew install ollama  # macOS
-# or curl -fsSL https://ollama.ai/install.sh | sh  # Linux
+```powershell
+# See LLAMACPP_AMD_SETUP.md for detailed GPU setup (NVIDIA or AMD)
+# Quick version:
 
-# Start Ollama and download model
-ollama serve
-ollama pull llama3.1:8b
+# For NVIDIA GPUs:
+# 1. Install CUDA Toolkit from nvidia.com
+# 2. Build: cmake .. -DLLAMA_CUDA=ON
 
-# Install minimal dependencies
+# For AMD GPUs:
+# 1. Install ROCm from AMD
+# 2. Build: cmake .. -DLLAMA_HIPBLAS=ON -DAMDGPU_TARGETS=gfx1030
+
+# 3. Download a GGUF model and start server
+.\server.exe -m model.gguf -ngl 40 --port 8080
+
+# 4. Install dependencies and run
 pip install -r requirements-minimal.txt
-
-# Run processing
+$env:INFERENCE_BACKEND="llamacpp"
 python -m claim_assist.main example_claims.csv
 ```
 
@@ -47,7 +53,10 @@ export ANTHROPIC_API_KEY="your-api-key-here"
 python -m claim_assist.main example_claims.csv --inference-backend anthropic
 ```
 
-See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed local inference setup.
+**Setup Guides:**
+- ☁️ [CLOUD_DEPLOYMENT.md](CLOUD_DEPLOYMENT.md) - **Run this online with cloud GPUs!**
+- 🚀 [LLAMACPP_AMD_SETUP.md](LLAMACPP_AMD_SETUP.md) - **GPU users (NVIDIA/AMD) start here!**
+- 📖 [LOCAL_SETUP.md](LOCAL_SETUP.md) - Detailed guide for all local inference options
 
 ## Configuration
 

@@ -21,18 +21,18 @@ def test_local_inference():
     
     # Create config with default local settings
     config = Config(
-        inference_backend="ollama",
-        model_name="llama3.1:8b",
-        inference_base_url="http://localhost:11434"
+        inference_backend="llamacpp",
+        model_name="llama-3.1-8b-instruct",
+        inference_base_url="http://localhost:8080/v1",
     )
     
     try:
         client = create_inference_client(config)
         
         if not client.is_available():
-            print("❌ Local inference client is not available")
-            print("Make sure Ollama is running: ollama serve")
-            print("And model is downloaded: ollama pull llama3.1:8b")
+            print("❌ Inference client is not available!")
+            print("Make sure llama.cpp server is running on port 8080")
+            print("See LLAMACPP_AMD_SETUP.md for setup instructions")
             return False
         
         # Test simple generation
@@ -80,8 +80,9 @@ def test_item_classification():
     
     try:
         config = Config(
-            inference_backend="ollama",
-            model_name="llama3.1:8b"
+            inference_backend="llamacpp",
+            model_name="llama-3.1-8b-instruct",
+            inference_base_url="http://localhost:8080/v1"
         )
         
         client = create_inference_client(config)
@@ -115,8 +116,9 @@ def test_price_research():
     
     try:
         config = Config(
-            inference_backend="ollama",
-            model_name="llama3.1:8b",
+            inference_backend="llamacpp",
+            model_name="llama-3.1-8b-instruct",
+            inference_base_url="http://localhost:8080/v1",
             scraping_delay=0.5,  # Faster for testing
             max_results_per_source=3
         )
@@ -183,12 +185,13 @@ def main():
     if passed == total:
         print("🎉 All tests passed! The system is ready to use.")
         print("\nTo run with your CSV:")
-        print("python -m claim_assist.main your_claims.csv --inference-backend ollama")
+        print("python -m claim_assist.main your_claims.csv --inference-backend llamacpp")
     else:
         print("⚠️  Some tests failed. Check your setup:")
-        print("1. Make sure Ollama is running: ollama serve")
-        print("2. Make sure model is downloaded: ollama pull llama3.1:8b")
+        print("1. Make sure llama.cpp server is running on port 8080")
+        print("2. Make sure model is loaded in llama.cpp")
         print("3. Check network connectivity for web scraping")
+        print("\nSee LLAMACPP_AMD_SETUP.md for detailed setup instructions")
 
 
 if __name__ == "__main__":

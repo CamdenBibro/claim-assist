@@ -56,16 +56,16 @@ def main():
     )
     parser.add_argument(
         "--inference-backend",
-        choices=["ollama", "openai_compatible", "transformers", "anthropic"],
-        help="Local inference backend to use (default: ollama)"
+        choices=["llamacpp", "openai_compatible", "transformers", "anthropic"],
+        help="Local inference backend to use (default: llamacpp)"
     )
     parser.add_argument(
         "--model-name",
-        help="Name of the model to use (e.g., llama3.1:8b, gpt-3.5-turbo)"
+        help="Name of the model to use (e.g., llama-3.1-8b-instruct, gpt-3.5-turbo)"
     )
     parser.add_argument(
         "--inference-url",
-        help="Base URL for inference API (for ollama/openai_compatible backends)"
+        help="Base URL for inference API (for llamacpp/openai_compatible backends)"
     )
     parser.add_argument(
         "--api-key",
@@ -112,7 +112,7 @@ def main():
     except ValueError as e:
         print(f"Configuration error: {e}", file=sys.stderr)
         print("\nFor local inference, make sure your model server is running.")
-        print("For Ollama: run 'ollama serve' and 'ollama pull llama3.1:8b'")
+        print("For llama.cpp: Start server on port 8080 - see LLAMACPP_AMD_SETUP.md")
         print("For Anthropic (legacy): set ANTHROPIC_API_KEY environment variable")
         sys.exit(1)
 

@@ -1,6 +1,6 @@
 """
 Local inference client for various local LLM backends
-Supports Ollama, vLLM, Transformers, and OpenAI-compatible APIs
+Supports llama.cpp, vLLM, Transformers, and OpenAI-compatible APIs
 """
 
 import json
@@ -34,35 +34,44 @@ class LocalInferenceClient(ABC):
         pass
 
 
-class OllamaClient(LocalInferenceClient):
-    """Client for Ollama local inference"""
+class LlamaCppClient(LocalInferenceClient):
+    """Client for llama.cpp server (OpenAI-compatible API with better AMD GPU support)"""
     
-    def __init__(self, model_name: str = "llama3.1:8b", base_url: str = "http://localhost:11434"):
+    def __init__(self, model_name: str = "llama-3.1-8b", base_url: str = "http://localhost:8080/v1", api_key: str = "dummy"):
         self.model_name = model_name
         self.base_url = base_url
-        self.api_url = f"{base_url}/api/generate"
+        self.api_key = api_key
+        self.headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
     
     def generate(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.1) -> InferenceResponse:
-        """Generate response using Ollama"""
+        """Generate response using llama.cpp server"""
         try:
             payload = {
                 "model": self.model_name,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": temperature,
-                    "num_predict": max_tokens
-                }
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens,
+                "temperature": temperature
             }
             
-            response = requests.post(self.api_url, json=payload, timeout=120)
+            response = requests.post(
+                f"{self.base_url}/chat/completions",
+                headers=self.headers,
+                json=payload,
+                timeout=120
+            )
             response.raise_for_status()
             
             result = response.json()
+            content = result["choices"][0]["message"]["content"]
+            tokens_used = result.get("usage", {}).get("total_tokens")
+            
             return InferenceResponse(
-                content=result.get("response", ""),
+                content=content,
                 model=self.model_name,
-                tokens_used=result.get("eval_count"),
+                tokens_used=tokens_used,
                 success=True
             )
             
@@ -75,9 +84,14 @@ class OllamaClient(LocalInferenceClient):
             )
     
     def is_available(self) -> bool:
-        """Check if Ollama is available"""
+        """Check if llama.cpp server is available"""
         try:
-            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            # Try the health endpoint first
+            response = requests.get(f"{self.base_url.replace('/v1', '')}/health", timeout=5)
+            if response.status_code == 200:
+                return True
+            # Fallback to models endpoint
+            response = requests.get(f"{self.base_url}/models", headers=self.headers, timeout=5)
             return response.status_code == 200
         except:
             return False
@@ -135,6 +149,69 @@ class OpenAICompatibleClient(LocalInferenceClient):
     def is_available(self) -> bool:
         """Check if the API is available"""
         try:
+            response = requests.get(f"{self.base_url}/models", headers=self.headers, timeout=5)
+            return response.status_code == 200
+        except:
+            return False
+
+
+class LlamaCppClient(LocalInferenceClient):
+    """Client for llama.cpp server (OpenAI-compatible API with better AMD GPU support)"""
+    
+    def __init__(self, model_name: str = "llama-3.1-8b", base_url: str = "http://localhost:8080/v1", api_key: str = "dummy"):
+        self.model_name = model_name
+        self.base_url = base_url
+        self.api_key = api_key
+        self.headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+    
+    def generate(self, prompt: str, max_tokens: int = 2000, temperature: float = 0.1) -> InferenceResponse:
+        """Generate response using llama.cpp server"""
+        try:
+            payload = {
+                "model": self.model_name,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens,
+                "temperature": temperature
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/chat/completions",
+                headers=self.headers,
+                json=payload,
+                timeout=120
+            )
+            response.raise_for_status()
+            
+            result = response.json()
+            content = result["choices"][0]["message"]["content"]
+            tokens_used = result.get("usage", {}).get("total_tokens")
+            
+            return InferenceResponse(
+                content=content,
+                model=self.model_name,
+                tokens_used=tokens_used,
+                success=True
+            )
+            
+        except Exception as e:
+            return InferenceResponse(
+                content="",
+                model=self.model_name,
+                success=False,
+                error=str(e)
+            )
+    
+    def is_available(self) -> bool:
+        """Check if llama.cpp server is available"""
+        try:
+            # Try the health endpoint first
+            response = requests.get(f"{self.base_url.replace('/v1', '')}/health", timeout=5)
+            if response.status_code == 200:
+                return True
+            # Fallback to models endpoint
             response = requests.get(f"{self.base_url}/models", headers=self.headers, timeout=5)
             return response.status_code == 200
         except:
@@ -222,17 +299,18 @@ class InferenceClientFactory:
         Create a local inference client
         
         Args:
-            backend_type: Type of backend ('ollama', 'openai_compatible', 'transformers')
+            backend_type: Type of backend ('llamacpp', 'openai_compatible', 'transformers')
             model_name: Name of the model to use
             **kwargs: Additional arguments for the specific client
         
         Returns:
             LocalInferenceClient instance
         """
-        if backend_type == "ollama":
-            return OllamaClient(
+        if backend_type == "llamacpp":
+            return LlamaCppClient(
                 model_name=model_name,
-                base_url=kwargs.get("base_url", "http://localhost:11434")
+                base_url=kwargs.get("base_url", "http://localhost:8080/v1"),
+                api_key=kwargs.get("api_key", "dummy")
             )
         elif backend_type == "openai_compatible":
             return OpenAICompatibleClient(
@@ -249,10 +327,10 @@ class InferenceClientFactory:
     def auto_detect_available() -> Optional[LocalInferenceClient]:
         """Auto-detect and return the first available local inference client"""
         
-        # Try Ollama first (most common for local inference)
-        ollama_client = OllamaClient()
-        if ollama_client.is_available():
-            return ollama_client
+        # Try llama.cpp first (best for AMD GPUs)
+        llamacpp_client = LlamaCppClient()
+        if llamacpp_client.is_available():
+            return llamacpp_client
         
         # Try vLLM/LocalAI (OpenAI-compatible)
         openai_client = OpenAICompatibleClient()
