@@ -1,0 +1,169 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.2.2">
+  <diagram name="Enhanced Claim-Assist Architecture" id="enhanced-claim-assist-flow">
+    <mxGraphModel dx="823" dy="530" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2339" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Enhanced Claim-Assist Architecture&#xa;Local LLM (llama.cpp) + Multi-Source Web Scraping" vertex="1">
+          <mxGeometry height="60" width="520" x="120" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-6" edge="1" parent="1" source="Qc_qaT6qmEuyhT_ak8KV-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="simple-pricing">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-11" edge="1" parent="1" source="router" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Qc_qaT6qmEuyhT_ak8KV-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="router" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Value Router&lt;br&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="170" x="240" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="simple-pricing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Simple Pricing&lt;br&gt;Depreciation Formula&lt;br&gt;No API Calls&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="150" x="560" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="research-pipeline" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="🔬 Enhanced Research Pipeline" vertex="1">
+          <mxGeometry height="40" width="680" x="40" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-14" edge="1" parent="1" source="classifier" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Qc_qaT6qmEuyhT_ak8KV-13" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="classifier" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" value="Item Classifier&lt;br&gt;(llama.cpp)&lt;br&gt;Electronics/Furniture/etc." vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="query-generator" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" value="🔍 Query Generator&#xa;Smart Deduplication&#xa;Brand Detection" vertex="1">
+          <mxGeometry height="80" width="120" x="180" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="webscraping-title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="🌐 Multi-Source Web Scraping with Reliability Ranking" vertex="1">
+          <mxGeometry height="30" width="400" x="320" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="google-shopping" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" value="🛒 Google Shopping&#xa;Reliability: 1.0&#xa;Retail Prices (Best Buy, Amazon)&#xa;New Item Focus" vertex="1">
+          <mxGeometry height="80" width="120" x="320" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="ebay" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" value="🏪 eBay&#xa;Reliability: 0.8&#xa;Sold Listings&#xa;Wide Coverage" vertex="1">
+          <mxGeometry height="80" width="120" x="460" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="facebook" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#f8cecc;strokeColor=#b85450;" value="📱 Facebook Marketplace&#xa;Reliability: 0.6&#xa;Local Market Prices&#xa;Multiple Scraping Methods" vertex="1">
+          <mxGeometry height="80" width="120" x="600" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-scraper" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" value="🤖 MCP Web Scraper&#xa;BeautifulSoup + Requests&#xa;Rate Limiting&#xa;Error Handling" vertex="1">
+          <mxGeometry height="60" width="400" x="320" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="ranking-system" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="⭐ Intelligent Ranking System" vertex="1">
+          <mxGeometry height="30" width="680" x="40" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="source-reliability" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" value="📊 Source Reliability&#xa;Google Shopping: 1.0&#xa;eBay: 0.8&#xa;Facebook: 0.6" vertex="1">
+          <mxGeometry height="80" width="140" x="40" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="retail-priority" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" value="🏬 Retail Prioritization&#xa;Retail Sources First&#xa;Marketplace for Validation&#xa;Insurance Replacement Focus" vertex="1">
+          <mxGeometry height="80" width="140" x="210" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="relevance-filter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" value="🎯 Relevance Filtering&#xa;Keyword Matching&#xa;Brand Detection&#xa;Title Analysis" vertex="1">
+          <mxGeometry height="80" width="140" x="400" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="deduplication" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" value="🔄 Deduplication&#xa;Title + Price Matching&#xa;Source Grouping&#xa;Quality Scoring" vertex="1">
+          <mxGeometry height="80" width="140" x="580" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="llm-analysis-title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="🧠 Enhanced LLM Analysis (llama.cpp)" vertex="1">
+          <mxGeometry height="30" width="680" x="40" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="local-llm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" value="🖥️ Local llama.cpp&#xa;No API Costs&#xa;Privacy Protected&#xa;Offline Capable" vertex="1">
+          <mxGeometry height="80" width="140" x="40" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="source-prompts" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" value="📝 Source-Aware Prompts&#xa;Reliability Weighting&#xa;Retail vs Marketplace&#xa;Statistical Analysis" vertex="1">
+          <mxGeometry height="80" width="140" x="200" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="price-analysis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" value="💰 Weighted Analysis&#xa;75th Percentile Standard&#xa;Condition Adjustment&#xa;Depreciation Factors" vertex="1">
+          <mxGeometry height="80" width="140" x="360" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="confidence" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" value="📈 Confidence Scoring&#xa;Source Mix Quality&#xa;Price Range Analysis&#xa;Data Availability" vertex="1">
+          <mxGeometry height="80" width="140" x="520" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="validator" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="✅ Price Validator&#xa;(llama.cpp)&#xa;Sanity Checks&#xa;Outlier Detection" vertex="1">
+          <mxGeometry height="80" width="140" x="40" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="output-title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="📤 Structured Output" vertex="1">
+          <mxGeometry height="30" width="500" x="220" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="results-csv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" value="📊 Results CSV&#xa;All Items Processed&#xa;Detailed Analysis&#xa;Source Breakdown" vertex="1">
+          <mxGeometry height="80" width="140" x="220" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="review-csv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" value="🔍 Review CSV&#xa;High-Value Items&#xa;Low Confidence&#xa;Manual Review Needed" vertex="1">
+          <mxGeometry height="80" width="140" x="380" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="summary" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" value="📋 Summary Report&#xa;Total Claim Value&#xa;Processing Statistics&#xa;Confidence Metrics" vertex="1">
+          <mxGeometry height="80" width="140" x="540" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow9" edge="1" parent="1" source="google-shopping" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="mcp-scraper">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow10" edge="1" parent="1" source="ebay" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="mcp-scraper">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow11" edge="1" parent="1" source="facebook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="mcp-scraper">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow12" edge="1" parent="1" source="mcp-scraper" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="source-reliability">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow13" edge="1" parent="1" source="source-reliability" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="retail-priority">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow14" edge="1" parent="1" source="retail-priority" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="relevance-filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow15" edge="1" parent="1" source="relevance-filter" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="deduplication">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow17" edge="1" parent="1" source="local-llm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="source-prompts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow18" edge="1" parent="1" source="source-prompts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="price-analysis">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow19" edge="1" parent="1" source="price-analysis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="confidence">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow21" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="results-csv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow22" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="review-csv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow23" edge="1" parent="1" source="validator" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;" target="summary">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="config-box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#f0f0f0;strokeColor=#666666;align=left;spacingLeft=10;" value="⚙️ Configuration&#xa;• enable_google_shopping&#xa;• enable_facebook_marketplace&#xa;• prioritize_retail_sources&#xa;• min_reliability_score&#xa;• source ranking weights" vertex="1">
+          <mxGeometry height="120" width="180" x="750" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-5" edge="1" parent="1" source="Qc_qaT6qmEuyhT_ak8KV-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="router">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;" value="" vertex="1">
+          <mxGeometry height="120" width="160" x="30" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="csv-input" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Insurance Claim Items&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="140" x="40" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;&lt;font style=&quot;&quot;&gt;Description,B&lt;/font&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;rand, Condition, A&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;ge, F&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;eatures,&lt;/span&gt;&lt;/font&gt;&lt;div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;Estimated_value&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="140" x="40" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Item value more than&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;$100&lt;/span&gt;" vertex="1">
+          <mxGeometry height="60" width="105" x="272.5" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-9" edge="1" parent="1" source="router" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="Qc_qaT6qmEuyhT_ak8KV-7" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="180" as="sourcePoint" />
+            <mxPoint x="560" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Item value less than&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;$100&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="100" x="430" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-12" edge="1" parent="1" source="Qc_qaT6qmEuyhT_ak8KV-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.419;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="research-pipeline">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Qc_qaT6qmEuyhT_ak8KV-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" value="simple, medium, high" vertex="1">
+          <mxGeometry height="80" width="120" x="180" y="390" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
