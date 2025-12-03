@@ -29,8 +29,8 @@ Maybe it can. The purpose of this project was to explore the potential of using 
 *How expensive is this going to be?*
 
 ---
-
-## Methodology Overview
+# Claude Web-Search Architecture
+## Methodology Overview 
 
 1. **Multi-Agent LLM Workflow**
    The system is decomposed into specialized “agents”:
@@ -68,8 +68,7 @@ Maybe it can. The purpose of this project was to explore the potential of using 
 <img width="1381" height="661" alt="claimAssist-pipeline drawio" src="https://github.com/user-attachments/assets/9328ca4a-4f64-401d-80b5-5e4b3b61ad17" />
 
 
-## Implementation
-
+## Implementation 
 #### High-Level Architecture
 
 The system follows this end-to-end pipeline:
@@ -460,7 +459,38 @@ Takeaways:
 	- Far more efficient and cost effective than Sonnet / although still slow
 	- More consistent web searches, and better at following prompt rules
 
-## Alternative Approach
+---
+
+## Critical Analysis & Impact | LLM Cloud API Architecture (Claude web-search tooling)
+#### Should people use this tool?  - Maybe? If the cost was lower...
+
+- It is a difficult task for current web-based tools to perform **efficient** web searches.
+- The models need a lot of time to reason and search the web, and this can cost a lot.  
+
+To have confidence in the models, we would need to increase parameters to the API calls.
+	- Allow more web searches
+		- ```max_search(5) # set higher```
+		- Set prompt that requires more comparable results, pushing the models to perform more extensive research.
+	  
+**However, the cost and runtime would skyrocket**
+
+####  What It Reveals / Suggests
+
+If deployed carefully with human oversight, this system could help you chug through extensive claims lists and help you find decent valuations that don't undercut actual value. **This would bring real value**
+
+- **LLMs are strong at “last-mile” reasoning** when given tool access and structured prompts, but:
+  - They struggle most on **edge cases** (e.g., unbranded vintage furniture)  
+  - They can be brittle under rate limits and JSON formatting constraints  
+- The “right” architecture balances:
+  - **Heuristics + rules** (for low-value or simple items)  
+  - **LLM reasoning + web search** (for complex, subjective items)  
+  - **Human review** (for high-risk or low-confidence outputs)  
+
+#### Difficult to validate
+**Insurance companies invest millions in creating datasets that serve this purpose**. This tool would be useful to help individuals dispute low claim valuations, but it's a long ways away from replacing claims adjusters.
+
+
+### Alternative Approach
 
 What if we manually web-scraped, and fed the data directly into a locally hosted series of models, requiring zero API cost?
 
@@ -470,7 +500,9 @@ We simulate tool calling functionality through a RAG-based system by first scrap
 
 ---
 
-## Local LLM Research Architecture
+
+
+# Local LLM Research Architecture
 
 ### Overview: Zero-Cost Local Processing
 
@@ -648,40 +680,13 @@ Includes:
 - **Hardware-scalable performance**  
 
 
-  
-
 
 ---
 
-## Critical Analysis & Impact
 
-### Should people use this tool?  - Maybe? If the cost was lower...
+## Critical Analysis | Local LLM Research Architecture
+#### Should people use this tool?
 
-- It is a difficult task for current web-based tools to perform **efficient** web searches.
-- The models need a lot of time to reason and search the web, and this can cost a lot.  
-
-To have confidence in the models, we would need to increase parameters to the API calls.
-	- Allow more web searches
-		- ```max_search(5) # set higher```
-		- Set prompt that requires more comparable results, pushing the models to perform more extensive research.
-	  
-**However, the cost and runtime would skyrocket**
-
-###  What It Reveals / Suggests
-
-If deployed carefully with human oversight, this system could help you chug through extensive claims lists and help you find decent valuations that don't undercut actual value. **This would bring real value**
-
-- **LLMs are strong at “last-mile” reasoning** when given tool access and structured prompts, but:
-  - They struggle most on **edge cases** (e.g., unbranded vintage furniture)  
-  - They can be brittle under rate limits and JSON formatting constraints  
-- The “right” architecture balances:
-  - **Heuristics + rules** (for low-value or simple items)  
-  - **LLM reasoning + web search** (for complex, subjective items)  
-  - **Human review** (for high-risk or low-confidence outputs)  
-
-### Difficult to validate
-
-**Insurance companies invest millions in creating datasets that serve this purpose**. This tool would be useful to help individuals dispute low claim valuations, but it's a long ways away from replacing claims adjusters.
 
 ---
 
