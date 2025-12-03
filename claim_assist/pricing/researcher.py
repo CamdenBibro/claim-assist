@@ -11,51 +11,64 @@ class PriceResearcher:
         self,
         client: anthropic.Anthropic,
         simple_model: str = "claude-3-5-haiku-latest",
-        complex_model: str =  "claude-sonnet-4-5-20250929" #"claude-3-5-haiku-latest"
+        complex_model: str =  "claude-sonnet-4-5-20250929" #"claude-3-5-haiku-latest" 
     ):
         self.client = client
         self.simple_model = simple_model
         self.complex_model = complex_model
 
     def research(self, item: ClaimItem, complexity: str) -> Dict:
-        """
-        Research comparable prices for an item
+        search_prompt = f"""You are an insurance claim adjuster evaluating replacement costs. Use web search to find VALID comparable prices.
 
-        Args:
-            item: ClaimItem to research
-            complexity: Complexity level (simple|moderate|complex)
+        ITEM TO PRICE:
+        - Description: {item.description}
+        - Brand: {item.brand or 'unbranded'}
+        - Condition: {item.condition or 'used'}
+        - Age/Year: {item.age or 'unknown'}
+        - Estimated Value: ${item.estimated_value or 'unknown'}
 
-        Returns:
-            Dict with comparable_prices, sources, recommended_value, confidence, reasoning, search_queries_used
-        """
-        item_dict = item.to_dict()
+        SEARCH STRATEGY:
+        1. Search ONLY eBay and Facebook Marketplace for items matching this description
+        2. For EACH listing found, evaluate if it's a valid comparable
+        3. REJECT listings that are:
+        - Refurbished, renewed, or certified pre-owned
+        - From auctions (only final sale/Buy It Now prices)
+        - Significantly different condition than the original item
+        - Different model/generation/variant
+        - Bundle deals or parts-only listings
+        - More than 5 years different in age (if age is known)
+        - Priced as extreme outliers (>3x or <0.3x median)
+        4. ACCEPT only listings that match condition, model, and age reasonably
 
-        search_prompt = f"""You are an insurance claim adjuster. Use web search to find replacement costs.
+        IMPORTANT: Include ONLY valid comparable prices. If fewer than 3 valid comparables found, note this in reasoning.
 
-ITEM: {item_dict['description']}
-BRAND: {item_dict.get('brand', 'unbranded')}
-CONDITION: {item_dict.get('condition', 'used')}
-AGE: {item_dict.get('age', 'unknown')}
+        Return ONLY this exact JSON format with NO additional text:
+        {{
+        "price_sources":[
+        {{"source":"eBay - [exact item title]","price":number,"condition":"used/new","notes":"brief validation note"}},
+        ...
+        ],
+        "comparable_count":number_of_valid_items_found,
+        "total_listings_evaluated":total_number_checked,
+        "recommended_value":calculated_value,
+        "confidence":"low|medium|high",
+        "reasoning":"Explain: How many comparables found? Why were some rejected? How did you calculate recommended_value? Any data quality concerns?",
+        "search_queries_used":["query 1","query 2",...]
+        }}
 
-Search ONLY eBay, Facebook Marketplace. Find 5-10 comparable prices. Do not include refurbished or auction prices. For ebay, only used items final sale or buy it now prices.
+        CONFIDENCE SCORING:
+        - high: 5+ valid comparables, tight price clustering, good condition match
+        - medium: 3-4 comparables OR some condition variance OR moderate price spread
+        - low: <3 comparables OR high variance OR poor condition match OR search failed
 
-CRITICAL: Return ONLY this exact JSON format with NO additional text before or after:
-{{
-"price_sources":[{{"source":"source name","price":actual_price_number}},...],
-"recommended_value":calculated_median_or_average,
-"confidence":"low|medium|high",
-"reasoning":"Brief explanation of how you arrived at this price",
-"search_queries_used":["actual search query you used"]
-}}
-
-Rules:
-- NO markdown formatting
-- NO explanatory text outside the JSON
-- Use double quotes for strings
-- Numbers must not be quoted (use raw numbers like 650, not "650")
-- Include ALL prices you found in price_sources array
-- recommended_value should be the median or average of the prices found
-- Array items separated by commas only"""
+        Rules:
+        - NO markdown formatting
+        - NO explanatory text outside JSON
+        - Use double quotes for strings
+        - Numbers must not be quoted (use raw numbers like 650, not "650")
+        - Include condition and notes for each price source
+        - recommended_value should be median of valid comparables (or mean if <5 items)
+        - If no valid comparables, use estimated_value with "low" confidence"""
 
         # Use Sonnet for complex items, Haiku for simple/moderate
         model = self.complex_model if complexity == Complexity.COMPLEX.value else self.simple_model
@@ -159,7 +172,7 @@ Rules:
             price_sources = result.get('price_sources', [])
             result['comparable_prices'] = [
                 float(item['price']) for item in price_sources
-                if isinstance(item, dict) and 'price' in item and item['price'] > 0
+                if isinstance(item, dict) and 'price' in item and item['price'] is not None and item['price'] > 0
             ]
             result['sources'] = [
                 item['source'] for item in price_sources
@@ -169,7 +182,7 @@ Rules:
             result['price_source_details'] = [
                 f"{item['source']}: ${float(item['price']):.2f}"
                 for item in price_sources
-                if isinstance(item, dict) and 'source' in item and 'price' in item
+                if isinstance(item, dict) and 'source' in item and 'price' in item and item['price'] is not None
             ]
         else:
             # Legacy format: separate lists
