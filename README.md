@@ -464,7 +464,191 @@ Takeaways:
 
 What if we manually web-scraped, and fed the data directly into a locally hosted series of models, requiring zero API cost?
 
+Solution: Instead of sending claim data to API with packaged blackbox solution, we deploy local models with llama.cpp infrastructure and selected models based on desired complexity and GGUF model file.
 
+We simulate tool calling functionality through a RAG-based system by first scraping each item through BeautifulSoup on eBay and Selenium on Facebook Marketplace and Google Shopping.
+
+---
+
+## Local LLM Research Architecture
+
+### Overview: Zero-Cost Local Processing
+
+The enhanced research architecture eliminates API costs entirely by combining direct web scraping with local LLM inference. This approach provides three primary stages:
+
+1. **Direct Web Scraping**: Manual data collection from marketplaces  
+2. **Local LLM Processing**: Self-hosted inference using llama-cpp-python or Transformers  
+3. **Intelligent Analysis**: Local models process scraped data for pricing decisions  
+
+### Implementation Approaches
+
+| **Aspect** | **llama-cpp-python Library** | **HuggingFace Transformers** |
+|------------|------------------------------|------------------------------|
+| **Integration** | Direct Python import | PyTorch/Transformers pipeline |
+| **Memory Management** | GGUF + app-controlled | GPU memory pools |
+| **Model Format** | GGUF quantized | safetensors |
+| **Performance** | Fast C++ backend | Higher overhead |
+| **Setup Complexity** | Simple | More dependencies |
+| **Cloud Deployment** | Excellent | Requires more setup |
+
+---
+
+### Architecture Flow
+
+```
+Item → Generate Queries → Web Scraping → Data Processing → Local LLM Analysis → Validated Results
+```
+
+Only three components differ from the cloud-API version:  
+**Web Scraping**, **Data Processing**, and **Local LLM Analysis**.
+
+---
+
+### Step 1: Query Generation
+
+Optimizations:
+
+- Brand detection  
+- Condition-aware phrasing  
+- Deduplication  
+- Relevance filtering  
+
+---
+
+### Step 2: Multi-Source Web Scraping (MCP Approach)
+
+**File:** `claim_assist/utils/web_scraping.py`
+
+**Sources:**
+
+| Source                  | Price Type                 | Use Case                       | Tools         |
+|-------------------------|-----------------------------|--------------------------------|---------------|
+| **Google Shopping**     | Retail (new items)          | Insurance replacement standard | Selenium      |
+| **eBay**                | Marketplace (sold listings) | Used market validation         | BeautifulSoup |
+| **Facebook Marketplace**| Local market                | Regional price checks          | Selenium      |
+
+**eBay Example:**
+
+```python
+class MCPWebScraper:
+    def _search_ebay(self, query: str) -> List[PriceResult]:
+        params = {
+            '_nkw': query,
+            'LH_Sold': '1',
+            'LH_Complete': '1',
+            '_sop': '13',
+            '_ipg': '50'
+        }
+        # BeautifulSoup parsing, fallbacks, validation
+```
+
+Scraper features:
+- Rate limiting  
+- Multi-selector parsing  
+- Error recovery  
+- Price validation  
+
+---
+
+### Step 3: Local Inference Implementation
+
+**File:** `claim_assist/utils/local_inference.py`  
+Primary client: **llama-cpp-python**
+
+```python
+from llama_cpp import Llama
+
+class LlamaCppPythonClient(LocalInferenceClient):
+    def __init__(self, model_path: str, **kwargs):
+        self.model = Llama(
+            model_path=model_path,
+            n_ctx=kwargs.get('n_ctx', 4096),
+            n_gpu_layers=kwargs.get('n_gpu_layers', -1),
+            verbose=kwargs.get('verbose', False),
+            n_threads=kwargs.get('n_threads', 4),
+            use_mmap=True,
+            use_mlock=False
+        )
+
+```
+
+
+Transformers alternative included.
+
+---
+
+### Step 4: Local Pricing Research
+
+Same structure as cloud version, but:
+
+- All research steps occur locally  
+- Local model determines recommended value  
+- No API calls needed  
+
+---
+
+### Local vs Cloud Comparison
+
+| Metric               | Cloud API (Haiku)     | Local (llama.cpp)            |
+|----------------------|------------------------|-------------------------------|
+| **Cost per Item**    | $0.01–0.05             | $0.00                        |
+| **Processing Speed** | 10–30s                 | 5–15s                        |
+| **Privacy**          | External API           | Fully local                  |
+| **Offline Capability** | No                  | Scraping requires internet   |
+| **Model Control**    | Fixed                  | Fully customizable           |
+| **Scaling Cost**     | Linear                 | Fixed hardware              |
+
+Local model sizes:
+
+```
+llama-3.1-8b-instruct.Q4_K_M.gguf (~5GB)
+llama-3.1-8b-instruct.Q5_K_M.gguf (~6GB)
+llama-3.1-70b-instruct.Q4_K_M.gguf (~40GB)
+```
+
+---
+
+### Cloud Notebook Deployment (Colab)
+
+```python
+!apt-get update && apt-get install -y chromium-chromedriver
+
+!pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+
+from huggingface_hub import hf_hub_download
+model_path = hf_hub_download(
+    repo_id="bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+    filename="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+)
+
+import os
+os.environ['INFERENCE_BACKEND'] = 'llamacpp_python'
+os.environ['MODEL_PATH'] = model_path
+os.environ['N_GPU_LAYERS'] = '50'
+
+!python -m claim_assist.main example_claims.csv
+```
+
+Includes:
+
+- CUDA-enabled llama.cpp  
+- GGUF download via HF Hub  
+- Environment configuration  
+- Claim processing execution  
+
+---
+
+### Advantages of Local Research Architecture
+
+- **Zero API cost**  
+- **Full privacy**  
+- **No rate limits**  
+- **Higher customizability**  
+- **Better transparency**  
+- **Hardware-scalable performance**  
+
+
+  
 
 
 ---
