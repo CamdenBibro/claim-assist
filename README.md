@@ -117,7 +117,7 @@ else:
 
 #### 3. Complexity Classification (Haiku 3.5)
 
-For web-research, Sonnet 4.5 is larger and more expensive than Haiku, and we hypothesize results in better web-research results. This complexity classification determines when to use Sonnet 4.5 or  Haiku 4.5. 
+For web-research, Sonnet 4.5 is larger and more expensive than Haiku, therefore we hypothesize Sonnet results in better web-research results. This complexity classification determines when to use Sonnet 4.5 or  Haiku 4.5. 
 
 ```python
 # claim_assist/pricing/classifier.py
