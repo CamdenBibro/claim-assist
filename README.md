@@ -679,14 +679,71 @@ Includes:
 - **Better transparency**  
 - **Hardware-scalable performance**  
 
+--- 
+### Example output:
 
+  
+
+|item|recommended\_value|percentile\_75|price\_range|confidence|needs\_human\_review|reasoning|comparable\_count|price\_sources|search\_queries|
+|---|---|---|---|---|---|---|---|---|---|
+|IKEA bookshelf|42\.5|||medium|False|Simple depreciation heuristic for low-value item|0|||
+|Apple MacBook Pro 14-inch|881\.99|875\.99|$24\.99 - $2500\.00|high|False|Based on 30 total comparables, a tight price range of $24\.99 - $2500\.00, and a high-quality source like eBay, I used the 75th percentile to calculate a fair replacement value\. The item's excellent condition and 1-year age support this value\. Although there are some outliers, the median price and 75th percentile are consistent, indicating a reliable dataset\.|30|eBay: $246\.99; eBay: $299\.99; eBay: $450\.96; eBay: $625\.00; eBay: $770\.00; eBay: $787\.40; eBay: $819\.99; eBay: $875\.99; eBay: $900\.00; eBay: $2500\.00; eBay: $24\.99; eBay: $246\.99; eBay: $299\.99; eBay: $625\.00; eBay: $787\.40; eBay: $819\.99; eBay: $875\.99; eBay: $900\.00; eBay: $2349\.99; eBay: $2500\.00; eBay: $24\.99; eBay: $299\.99; eBay: $450\.96; eBay: $625\.00; eBay: $770\.00; eBay: $787\.40; eBay: $819\.99; eBay: $875\.99; eBay: $900\.00; eBay: $2349\.99|Apple MacBook Pro 14-inch, Apple Apple MacBook Pro 14-inch, used Apple Apple MacBook Pro 14-inch|
+|Dyson vacuum cleaner|100\.0|100\.0|$6\.39 - $279\.99|medium|True|Based on the 75th percentile of the comparable prices, which is a common insurance industry standard for determining replacement value\. The item's condition is excellent and age is 6 months, which supports the use of the 75th percentile\. However, there are only 10 high-quality comparables for Dyson vacuum cleaners, which limits the confidence level to medium\.|30|eBay: $24\.92; eBay: $39\.99; eBay: $39\.99; eBay: $78\.00; eBay: $85\.00; eBay: $100\.00; eBay: $109\.00; eBay: $134\.00; eBay: $262\.99; eBay: $279\.99; eBay: $6\.39; eBay: $13\.98; eBay: $14\.95; eBay: $39\.87; eBay: $39\.99; eBay: $39\.99; eBay: $57\.29; eBay: $78\.00; eBay: $100\.00; eBay: $134\.00; eBay: $6\.39; eBay: $13\.98; eBay: $14\.95; eBay: $37\.88; eBay: $39\.87; eBay: $39\.99; eBay: $57\.29; eBay: $78\.00; eBay: $100\.00; eBay: $134\.00|Dyson vacuum cleaner, Dyson Dyson vacuum cleaner, used Dyson Dyson vacuum cleaner|
+|Kitchen mixer|66\.25|65\.0|$8\.54 - $324\.99|medium|True|The 75th percentile is used as the fair replacement value, which is $66\.25\. This is a reasonable estimate considering the median price and the price range\. However, the confidence level is medium due to the presence of outliers and the relatively small number of comparables\.|30|eBay: $14\.37; eBay: $16\.29; eBay: $25\.08; eBay: $39\.90; eBay: $39\.97; eBay: $49\.99; eBay: $60\.00; eBay: $69\.99; eBay: $79\.99; eBay: $265\.99; eBay: $8\.54; eBay: $10\.00; eBay: $15\.39; eBay: $25\.08; eBay: $28\.39; eBay: $28\.59; eBay: $37\.94; eBay: $41\.99; eBay: $65\.00; eBay: $265\.99; eBay: $10\.00; eBay: $18\.36; eBay: $19\.99; eBay: $24\.99; eBay: $27\.99; eBay: $49\.99; eBay: $65\.00; eBay: $129\.00; eBay: $149\.00; eBay: $324\.99|Kitchen mixer, KitchenAid Kitchen mixer, used KitchenAid Kitchen mixer|
+|Samsung 55-inch 4K TV|1016\.6|1016\.6|$34\.99 - $1199\.00|high|True|Based on 28 comparables, the 75th percentile is used as the fair replacement value, which is $1016\.60\. The high number of comparables and the relatively tight price range justify a high confidence level\. The item's condition is good and age is 3 years, which is relatively recent, so no significant adjustments are needed\. The data quality appears to be high, with multiple listings from eBay, a reputable source\.|28|eBay: $445\.60; eBay: $547\.60; eBay: $627\.60; eBay: $699\.00; eBay: $897\.99; eBay: $1016\.60; eBay: $1099\.63; eBay: $1197\.99; eBay: $1199\.00; eBay: $445\.60; eBay: $547\.60; eBay: $627\.60; eBay: $699\.00; eBay: $897\.99; eBay: $1016\.60; eBay: $1099\.63; eBay: $1197\.99; eBay: $1199\.00; eBay: $34\.99; eBay: $85\.00; eBay: $87\.00; eBay: $93\.00; eBay: $150\.00; eBay: $150\.00; eBay: $175\.00; eBay: $210\.00; eBay: $250\.00; eBay: $450\.00|Samsung 55-inch 4K TV, Samsung Samsung 55-inch 4K TV, used Samsung Samsung 55-inch 4K TV|
+|Sony PlayStation 5|362\.46|359\.95|$11\.00 - $580\.00|medium|False|The 75th percentile is used as the fair replacement value, which is a common insurance industry standard\. The item's condition is considered good, but its age is 2 years, which is relatively recent\. The price range is reasonable, but there are some outliers, such as the $11\.00 listing for a game, which is likely an error\. The number of comparables is sufficient to establish a medium confidence level\.|30|eBay: $191\.00; eBay: $325\.00; eBay: $325\.00; eBay: $329\.95; eBay: $329\.95; eBay: $359\.95; eBay: $369\.99; eBay: $389\.99; eBay: $399\.99; eBay: $580\.00; eBay: $11\.00; eBay: $25\.00; eBay: $25\.00; eBay: $30\.00; eBay: $34\.00; eBay: $34\.98; eBay: $37\.99; eBay: $42\.99; eBay: $65\.00; eBay: $580\.00; eBay: $19\.00; eBay: $42\.99; eBay: $65\.00; eBay: $70\.00; eBay: $100\.00; eBay: $329\.95; eBay: $329\.95; eBay: $359\.95; eBay: $389\.99; eBay: $580\.00|Sony PlayStation 5, Sony Sony PlayStation 5, used Sony Sony PlayStation 5|
+|Vintage leather armchair|1312\.5|1250\.0|$18\.00 - $6875\.00|medium|True|The 75th percentile is used as the recommended value, which is a common insurance industry standard\. However, the condition and age of the item need to be considered\. The item is in fair condition and 20 years old, which may affect its value\. The data quality is generally good, but there are some outliers, such as the $6875\.00 listing, which is likely an error\. The number of comparables is sufficient to provide a reasonable estimate, but not high enough to warrant a high confidence level\.|30|eBay: $45\.00; eBay: $79\.99; eBay: $99\.95; eBay: $115\.00; eBay: $295\.00; eBay: $450\.00; eBay: $499\.99; eBay: $499\.99; eBay: $1500\.00; eBay: $2499\.99; eBay: $100\.00; eBay: $469\.98; eBay: $500\.00; eBay: $500\.00; eBay: $589\.99; eBay: $750\.00; eBay: $1189\.17; eBay: $1250\.00; eBay: $1750\.00; eBay: $1950\.00; eBay: $18\.00; eBay: $61\.00; eBay: $139\.99; eBay: $229\.77; eBay: $275\.00; eBay: $550\.00; eBay: $750\.00; eBay: $1950\.00; eBay: $4197\.50; eBay: $6875\.00|Vintage leather armchair, Unknown Vintage leather armchair, used Unknown Vintage leather armchair|
+
+Takeaways:
+
+- Llama-3.1-8B-instruct treats noisy data with unjustified high confidence.
+
+- provide very wide and unrealistic price ranges
+
+- due to frequent scraping which contains irrelevant or hallucinated price outliers
+
+- Produce inflated recommended values
+
+(e.g., $1016 for a 55" TV that realistically resells for $350–$450)
+
+
+- Often duplicates comparables
+
+- Treats outliers as valid data
 
 ---
 
-
 ## Critical Analysis | Local LLM Research Architecture
+
+
 #### Should people use this tool?
 
+Right now, this system is best treated as a **decision-support prototype**, not a fully reliable pricing engine.
+
+The comparison between Llama-3.1-8B and Claude highlights several failure modes:
+
+- Llama is willing to assign **high confidence** to noisy, outlier-heavy data (e.g., recommending **$1,016** for a 55" TV that realistically trades around **$350–$450**).
+- It often **duplicates comparables**, inflating the apparent sample size.
+- It **accepts extreme outliers** as valid data points instead of treating them as noise.
+- The resulting **price ranges are unrealistically wide**, which undermines the meaning of a “75th percentile” benchmark.
+
+To move from “interesting prototype” toward “practically trustworthy,” several improvements are needed.
+
+#### Web Scraping Reliability Must Be Strengthened
+
+Local LLM accuracy is fundamentally limited by the quality of the scraped price data, and right now:
+
+Price sources are noisy
+
+Listings often include irrelevant, mismatched, or incomplete information
+
+Outliers (extremely low auction leftovers or extremely high decorative listings) distort the distribution
+
+Duplicated listings appear because local models scrape the same result multiple times
+
+HTML structure changes break the scraper without warning
+
+Marketplace pages heavily filter content based on location, hiding true comparables
 
 ---
 
@@ -694,27 +751,32 @@ Includes:
 #  Ethical & Bias Considerations
 
 1. **Data Source Bias**
-   2. Prices come only from **eBay** and **Facebook Marketplace**, which may not represent:
+   1. Prices come only from **eBay** and **Facebook Marketplace**, which may not represent:
 	 - All geographic regions
 	 - All demographic groups
 	 - Specific niche or luxury markets
-   3. This can bias valuations lower or higher for certain items.
+   2. This can bias valuations lower or higher for certain items.
 
-4. **LLM Hallucination & Misinterpretation**
-   5. Claude might:
+2. **LLM Hallucination & Misinterpretation**
+   1. Claude might:
 	 - Misread item descriptions
 	 - Pick comparable items that aren’t truly similar
-   6. Mitigations:
+   2. For even smaller models:
+   - Produce unrealistic ranges when scraping input is sparse
+   - Overtrust a single extreme comparable
+   - Misinterpret market context (e.g., mixing auction and buy-it-now data)
+   - Generate invented prices not backed by real scraping data
+   3. Mitigations:
 	 - Require multiple comparables when possible
 	 - Flag low-comparable-count items for human review
 	 - Use conservative confidence scoring and clear reasoning text.
 
-7. **High-Risk Items**
-   8. Complex, unbranded, or highly valuable items (e.g., **vintage leather armchairs**, **antique tables**) can be mispriced.  
-   9. Design choice: such items are **often flagged** for human intervention, explicitly recommends **never fully trusting LLM output alone** for these cases.
+3. **High-Risk Items**
+   1. Complex, unbranded, or highly valuable items (e.g., **vintage leather armchairs**, **antique tables**) can be mispriced.  
+   2. Design choice: such items are **often flagged** for human intervention, explicitly recommends **never fully trusting LLM output alone** for these cases.
 
-10. **Transparency & Auditability**
-   11. Each recommendation includes:
+4.  **Transparency & Auditability**
+   1.  Each recommendation includes:
 	 - Textual reasoning
 	 - Comparable count
 	 - Price sources (with marketplace + price)
@@ -740,7 +802,6 @@ This helps human reviewers audit and override the model when needed.
   - Uses public marketplace data only; no private user data or PHI is ingested.
 
 ---
-
 
 # Next Steps
 
