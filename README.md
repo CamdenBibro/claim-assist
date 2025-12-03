@@ -135,7 +135,8 @@ ItemClassifier.classify(item)
 {
   "complexity": "simple",
   "reasoning": "Standard consumer electronics, readily available"
-}```
+}
+```
 
 ---
 
@@ -149,27 +150,58 @@ PriceResearcher.research(item)
 **Prompt construction:**
 
 ``` python
-"""Search ONLY eBay, Facebook Marketplace. Find 5-10 comparable prices. Do not include refurbished or auction prices. For ebay, only used items final sale or buy it now prices.
+search_prompt = f"""You are an insurance claim adjuster evaluating replacement costs. Use web search to find VALID comparable prices.
 
-CRITICAL: Return ONLY this exact JSON format with NO additional text before or after:
-{{
-"price_sources":[{{"source":"source name","price":actual_price_number}},...],
-"recommended_value":calculated_median_or_average,
-"confidence":"low|medium|high",
-"reasoning":"Brief explanation of how you arrived at this price",
-"search_queries_used":["actual search query you used"]
-}}
+        ITEM TO PRICE:
+        - Description: {item.description}
+        - Brand: {item.brand or 'unbranded'}
+        - Condition: {item.condition or 'used'}
+        - Age/Year: {item.age or 'unknown'}
+        - Estimated Value: ${item.estimated_value or 'unknown'}
 
-Rules:
-- NO markdown formatting
-- NO explanatory text outside the JSON
-- Use double quotes for strings
-- Numbers must not be quoted (use raw numbers like 650, not "650")
-- Include ALL prices you found in price_sources array
-- recommended_value should be the median or average of the prices found
-- Array items separated by commas only"""
-  
-# Use Sonnet for complex items, Haiku for simple/moderate
+        SEARCH STRATEGY:
+        1. Search ONLY eBay and Facebook Marketplace for items matching this description
+        2. For EACH listing found, evaluate if it's a valid comparable
+        3. REJECT listings that are:
+        - Refurbished, renewed, or certified pre-owned
+        - From auctions (only final sale/Buy It Now prices)
+        - Significantly different condition than the original item
+        - Different model/generation/variant
+        - Bundle deals or parts-only listings
+        - More than 5 years different in age (if age is known)
+        - Priced as extreme outliers (>3x or <0.3x median)
+        4. ACCEPT only listings that match condition, model, and age reasonably
+
+        IMPORTANT: Include ONLY valid comparable prices. If fewer than 3 valid comparables found, note this in reasoning.
+
+        Return ONLY this exact JSON format with NO additional text:
+        {{
+        "price_sources":[
+        {{"source":"eBay - [exact item title]","price":number,"condition":"used/new","notes":"brief validation note"}},
+        ...
+        ],
+        "comparable_count":number_of_valid_items_found,
+        "total_listings_evaluated":total_number_checked,
+        "recommended_value":calculated_value,
+        "confidence":"low|medium|high",
+        "reasoning":"Explain: How many comparables found? Why were some rejected? How did you calculate recommended_value? Any data quality concerns?",
+        "search_queries_used":["query 1","query 2",...]
+        }}
+
+        CONFIDENCE SCORING:
+        - high: 5+ valid comparables, tight price clustering, good condition match
+        - medium: 3-4 comparables OR some condition variance OR moderate price spread
+        - low: <3 comparables OR high variance OR poor condition match OR search failed
+
+        Rules:
+        - NO markdown formatting
+        - NO explanatory text outside JSON
+        - Use double quotes for strings
+        - Numbers must not be quoted (use raw numbers like 650, not "650")
+        - Include condition and notes for each price source
+        - recommended_value should be median of valid comparables (or mean if <5 items)
+        - If no valid comparables, use estimated_value with "low" confidence"""
+
 model = self.complex_model if complexity == Complexity.COMPLEX.value else self.simple_model
 
 ```
