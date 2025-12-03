@@ -36,7 +36,7 @@ Maybe it can. The purpose of this project was to explore the potential of using 
    The system is decomposed into specialized “agents”:
 	 - **Router**: decides between heuristic pricing vs. LLM research
 	 - **Classifier**: categorizes item complexity using Haiku 4.5
-	 - **Researcher**: calls Sonnet 4.5 with a web-search tool to query eBay & Facebook Marketplace
+	 - **Researcher**: calls Sonnet or Haiku with a web-search tool to query eBay & Facebook Marketplace
 	 - **Validator**: applies insurance-specific business rules to decide final recommendation and human review flags
 
 2. **Tool Use / Function Calling**
@@ -101,7 +101,7 @@ Simply filters out low valued items for proof-of-concept.
 if item.estimated_value < threshold:  # Default: $100
     return simple_pricing(item)  # Fast heuristic (no LLM)
 else:
-    return full_llm_research(item)  # Haiku + web search
+    return full_llm_research(item)  # Sonnet or Haiku + web search
 ```
 
 - **Low-value items (\< $100)**
@@ -110,14 +110,14 @@ else:
   - Example: IKEA bookshelf → $42.50
 
 - **High-value items (≥ $100)**
-  - Use **Haiku** with web search on eBay + Facebook Marketplace
+  - Use **Sonnet or Haiku** with web search on eBay + Facebook Marketplace
   - Proceed through classification, research, validation
 
 ---
 
 #### 3. Complexity Classification (Haiku 3.5)
 
-For web-research, Sonnet 4.5 is larger and more expensive than Haiku 4.5, and results in better web-research results. This complexity classification determines when to use Sonnet 4.5 or  Haiku 4.5. 
+For web-research, Sonnet 4.5 is larger and more expensive than Haiku, and we hypothesize results in better web-research results. This complexity classification determines when to use Sonnet 4.5 or  Haiku 4.5. 
 
 ```python
 # claim_assist/pricing/classifier.py
@@ -219,11 +219,11 @@ model = self.complex_model if complexity == Complexity.COMPLEX.value else self.s
 	  - `reasoning`
 	  - `comparable_count`
 
-**API call:**
+**API call example:**
 
 ```python
 client.messages.create(
-    model="claude-3-5-haiku-latest",
+    model="claude-3-5-sonnet-latest",
     messages=[{"role": "user", "content": prompt}],
     tools=[{
         "type": "web_search_20250305",
@@ -233,7 +233,7 @@ client.messages.create(
 )
 ```
 
-**What Haiku does:**
+**What Sonnet does:**
 
 - Uses the `web_search` tool to query:
   - `site:ebay.com` and `site:facebook.com/marketplace`  
@@ -754,7 +754,7 @@ Areas for improvement / next steps:
 	 - Use API calls (or tables) to retrieve original retail price
 	 - Apply category-specific depreciation curves for items like sofas, appliances, etc.
 
-5. *****Vision Model Integration**
+5. **Vision Model Integration**
    6. Add a vision model to handle **item photos**:
 	 - Identify furniture type, style, material, and brand cues
 	 - Assist especially with **unbranded furniture** and **visually distinctive items**.
