@@ -10,7 +10,7 @@ Home property damage reimbursement through insurance claims is tedious, expensiv
 
 #### Question: "Why can't ChatGPT adjust claims?" 
 
-Maybe it can. The purpose of this project was to explore the potential of using orchestrated LLMs to tackle claims lists. 
+Maybe it can. The purpose of this project was to explore the potential of using orchestrated LLMs to price adjust claims lists. 
 
  **ClaimAssist** is a prototype tool that uses a **multi-agent LLM workflow** to:
 
