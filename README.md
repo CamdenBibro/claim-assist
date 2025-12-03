@@ -691,7 +691,7 @@ Includes:
 ---
 
 
-###  Ethical & Bias Considerations
+#  Ethical & Bias Considerations
 
 1. **Data Source Bias**
    2. Prices come only from **eBay** and **Facebook Marketplace**, which may not represent:
@@ -723,7 +723,7 @@ This helps human reviewers audit and override the model when needed.
 
 ---
 
-### Data Card (Marketplace Data)
+# Data Card (Marketplace Data)
 
 - **Data Sources:**
   - **eBay** and **Facebook Marketplace** search results, via web search tool  
@@ -742,7 +742,7 @@ This helps human reviewers audit and override the model when needed.
 ---
 
 
-### Next Steps
+# Next Steps
 
 Areas for improvement / next steps:
 
@@ -770,13 +770,13 @@ Areas for improvement / next steps:
 
 
 
-## Installation and Basic Guide
+# Installation and Basic Guide
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Configuration
+# Configuration
 
 Set your Anthropic API key:
 
@@ -791,9 +791,9 @@ export VALUE_THRESHOLD=100      # Minimum value for deep research (default: 100)
 export ENABLE_CACHE=true        # Enable result caching (default: true)
 ```
 
-## Usage
+# Usage
 
-### Command Line
+## Command Line
 
 ```bash
 python -m claim_assist.main input_claims.csv
@@ -809,7 +809,7 @@ python -m claim_assist.main input_claims.csv \
     --api-key "your-key"
 ```
 
-### Input CSV Format
+## Input CSV Format
 
 Required column:
 - `description`: Item description
@@ -830,7 +830,7 @@ description,brand,condition,age,features,estimated_value
 "IKEA bookshelf",IKEA,excellent,1 year,Billy series,50
 ```
 
-### Output
+## Output
 
 The tool generates two CSV files:
 
@@ -851,13 +851,13 @@ Output columns:
 
 
 
-### Process a claim file
+## Process a claim file
 
 ```bash
 python -m claim_assist.main fire_damage_claim.csv
 ```
 
-### Custom threshold and output files
+## Custom threshold and output files
 
 ```bash
 python -m claim_assist.main water_damage_claim.csv \
@@ -866,33 +866,33 @@ python -m claim_assist.main water_damage_claim.csv \
     --review water_damage_review.csv
 ```
 
-### Disable caching
+## Disable caching
 
 ```bash
 python -m claim_assist.main claim.csv --no-cache
 ```
 
-## Development
+# Development
 
-### Run tests
+## Run tests
 
 ```bash
 pytest tests/
 ```
 
-### Code formatting
+## Code formatting
 
 ```bash
 black claim_assist/
 ```
 
-### Linting
+## Linting
 
 ```bash
 flake8 claim_assist/
 ```
 
-###  Intended Uses & License
+##  Intended Uses & License
 
 **Intended use:**
 
