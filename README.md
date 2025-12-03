@@ -808,23 +808,23 @@ This helps human reviewers audit and override the model when needed.
 Areas for improvement / next steps:
 
 1. **Stronger Handling for Difficult Items**
-   2. Vintage, unbranded, or luxury furniture should **always be flagged** for human review, even if Haiku seems confident.
 
-3. **Depreciation Data Mapper**
-   4. Integrate a more principled **depreciation module**:
+
+2. **Depreciation Data Mapper**
+   Integrate a more principled **depreciation module**:
 	 - Use API calls (or tables) to retrieve original retail price
 	 - Apply category-specific depreciation curves for items like sofas, appliances, etc.
 
-5. **Vision Model Integration**
-   6. Add a vision model to handle **item photos**:
+3. **Vision Model Integration**
+    Add a vision model to handle **item photos**:
 	 - Identify furniture type, style, material, and brand cues
 	 - Assist especially with **unbranded furniture** and **visually distinctive items**.
 
-7. **Human-in-the-Loop Feedback**
-   8. Let adjusters:
+4. **Human-in-the-Loop Feedback**
+    Let adjusters:
 	 - Approve/override model recommendations
 	 - Provide feedback on whether comparable items were relevant
-   9. Use this feedback to improve prompts and rules over time.
+     Use this feedback to improve prompts and rules over time.
 
 ---
 
