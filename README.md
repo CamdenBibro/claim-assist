@@ -233,7 +233,7 @@ client.messages.create(
 )
 ```
 
-**What Sonnet does:**
+**What the researcher does:**
 
 - Uses the `web_search` tool to query:
   - `site:ebay.com` and `site:facebook.com/marketplace`  
