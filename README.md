@@ -397,7 +397,7 @@ You should see:
 |**Samsung 55-inch 4K TV**|Samsung|good|3 years|Smart TV QLED|800|
 |**Vintage leather armchair**|Unknown|fair|20 years|Genuine leather|300|
 |**IKEA bookshelf**|IKEA|excellent|1 year|Billy series|50|
-|**Apple MacBook Pro 14-inch**|Apple|excellent|1 year|M1 Pro 16GB RAM|2000|
+|**Apple MacBook Pro 14-inch**|Apple|excellent|1 year|M2 Pro 16GB RAM|2000|
 |**Antique oak dining table**|Unknown|good|50 years|Solid oak handcrafted|800|
 |**Sony PlayStation 5**|Sony|good|2 years|Digital Edition|400|
 |**Designer leather sofa**|West Elm|good|5 years|Italian leather 3-seater|1500|
