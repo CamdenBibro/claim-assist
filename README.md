@@ -352,9 +352,6 @@ claim_assist/
 ├── config.py             # Thresholds, model names, etc.
 └── main.py               # CLI entry point
 ```
-
-
-
 ---
 
 ###  Model Version / Architecture
@@ -623,7 +620,7 @@ Same structure as cloud version, but:
 
 | Metric               | Cloud API (Haiku)     | Local (llama.cpp)            |
 |----------------------|------------------------|-------------------------------|
-| **Cost per Item**    | $0.01–0.05             | $0.00                        |
+| **Cost per Item**    | $0.28–0.63             | $0.00                        |
 | **Processing Speed** | 10–30s                 | 5–15s                        |
 | **Privacy**          | External API           | Fully local                  |
 | **Offline Capability** | No                  | Scraping requires internet   |
@@ -952,6 +949,26 @@ black claim_assist/
 ```bash
 flake8 claim_assist/
 ```
+
+## Citations
+
+[1] Anthropic, Tool Use API Documentation. Accessed: Jan. 2025.
+Available: https://docs.anthropic.com/en/docs/tool-use
+
+[2] Anthropic, Claude 3.5 Models Overview. Accessed: Jan. 2025.
+Available: https://docs.anthropic.com/en/docs/about-claude/models
+
+[3] G. Gerganov, llama.cpp. Accessed: Jan. 2025.
+Available: https://github.com/ggerganov/llama.cpp
+
+[4] abetlen, llama-cpp-python Documentation. Accessed: Jan. 2025.
+Available: https://llama-cpp-python.readthedocs.io/
+
+[5] eBay Developers, Finding API: Advanced Search Parameters. Accessed: Jan. 2025.
+Available: https://developer.ebay.com/devzone/finding/CallRef/finding_Advanced.html
+
+[6] SeleniumHQ, Selenium Documentation. Accessed: Jan. 2025.
+Available: https://www.selenium.dev/documentation/
 
 ##  Intended Uses & License
 
