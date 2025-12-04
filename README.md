@@ -496,7 +496,7 @@ What if we manually web-scraped, and fed the data directly into a locally hosted
 
 Solution: Instead of sending claim data to API with packaged blackbox solution, we deploy local models with llama.cpp infrastructure and selected models based on desired complexity and GGUF model file.
 
-We simulate tool calling functionality through a RAG-based system by first scraping each item through BeautifulSoup on eBay and Selenium on Facebook Marketplace and Google Shopping.
+We simulate tool calling functionality through a RAG-based system by first scraping each item through BeautifulSoup on eBay and Selenium on Facebook Marketplace and Google Shopping and sending those results to selected model to do inference reasonings.
 
 ---
 
